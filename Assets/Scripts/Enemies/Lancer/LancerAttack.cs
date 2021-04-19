@@ -3,159 +3,196 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-
 public class LancerAttack : MonoBehaviour
 {
-    Animator lancerAnim;
-    NavMeshAgent lancerNavMesh;
-    LancerHealth lancerHealth;
-    ParticleSystem psGreenMagicCircle;
-    ParticleSystem psGreenFlamingSword;
-    ParticleSystem psGreenBullets;
-    ParticleSystem psYellowMagicCircle;
-    ParticleSystem psYellowSurge;
-    float timer;
+    private Animator lancerAnim;
+    private NavMeshAgent lancerNavMesh;
+    private LancerHealth lancerHealth;
+    private ParticleSystem psGreenMagicCircle;
+    private ParticleSystem psGreenFlamingSword;
+    private ParticleSystem psGreenBullets;
+    private ParticleSystem psYellowMagicCircle;
+    private ParticleSystem psYellowSurge;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
-        timer = 5f;
-        lancerAnim = GetComponent<Animator>();
-        lancerNavMesh = GetComponent<NavMeshAgent>();
+
+        lancerAnim = GetComponent<Animator> ( );
+        lancerNavMesh = GetComponent<NavMeshAgent> ( );
         lancerHealth = GetComponent<LancerHealth> ( );
 
-        foreach (Transform child in gameObject.GetComponentsInChildren<Transform>())
+        foreach ( Transform child in gameObject.GetComponentsInChildren<Transform> ( ) )
         {
-            if (child.name == "magic_ring_green")
+            if ( child.name == "magic_ring_green" )
             {
-                psGreenMagicCircle = child.GetComponent<ParticleSystem>();
+                psGreenMagicCircle = child.GetComponent<ParticleSystem> ( );
 
             }
 
-            if (child.name == "magic_ring_yellow")
+            if ( child.name == "magic_ring_yellow" )
             {
-                psYellowMagicCircle = child.GetComponent<ParticleSystem>();
+                psYellowMagicCircle = child.GetComponent<ParticleSystem> ( );
             }
 
-            if (child.name == "yellow surge")
+            if ( child.name == "yellow surge" )
             {
-                psYellowSurge = child.GetComponent<ParticleSystem>();
+                psYellowSurge = child.GetComponent<ParticleSystem> ( );
             }
 
-            if (child.name == "Green Bullets 9")
+            if ( child.name == "Green Bullets 9" )
             {
-                psGreenBullets = child.GetComponent<ParticleSystem>();
+                psGreenBullets = child.GetComponent<ParticleSystem> ( );
             }
         }
 
-        
-
-
     }
 
+    // private void Update ( )
+    //{
+    //    float power = GetComponent<Animator>().GetFloat("Power_Lancer");
 
+    //    if ( !psGreenMagicCircle.isPlaying && power >= 25.0f && power < 50.0f )
+    //    {
+    //        lancerNavMesh.isStopped = true;
 
-    private void Update ( )
-    {
-        float power = GetComponent<Animator>().GetFloat("Power");
+    //        psGreenMagicCircle.Play ( );
 
-        if (!psGreenMagicCircle.isPlaying && power >= 25.0f && power < 50.0f)
-        {
-            psGreenMagicCircle.Play ( );
-           
-            if ( !psGreenBullets.isPlaying )
-            {
-                psGreenBullets.Play ( );
+    //        if ( !psGreenBullets.isPlaying )
+    //        {
+    //            psGreenBullets.Play ( );
+    //        }
 
-            }
+    //        StartCoroutine ( GreenPowerOff ( power ) );
+    //        lancerNavMesh.isStopped = false;
+    //    }
 
-         
+    //    if ( !psYellowMagicCircle.isPlaying && power >= 50.0f )
+    //    {
+    //        psYellowMagicCircle.Play ( );
 
-        }
+    //        if ( !psYellowSurge.isPlaying )
+    //        {
+    //            psYellowSurge.Play ( );
+    //        }
 
-       
+    //        StartCoroutine ( YellowPowerOff ( power ) );
 
-        if ( !psYellowMagicCircle.isPlaying && power >= 50.0f )
-        {
-            psYellowMagicCircle.Play ( );
+    //    }
 
-            if ( !psYellowSurge.isPlaying )
-            {
-                psYellowSurge.Play ( );
-            }
+    //}
 
-           
-        }
+    //private IEnumerator YellowPowerOff ( float power )
+    //{
+    //    yield return new WaitForSeconds ( 5f );
 
-       
-    }
+    //    power = 0;
+    //    lancerNavMesh.GetComponent<Animator> ( ).SetFloat ( "Power" , power );
 
-    public void Attack(float power)
-    {
-       
-       if (power < 25.0f )
-       {
-           
-           StartCoroutine(Level1Attack ( ));
+    //    if ( psYellowSurge.isPlaying )
+    //    {
+    //        psYellowSurge.Stop ( );
+    //    }
 
-       }
+    //    yield return new WaitForSeconds ( 2f );
 
-       else if (power >= 25.0f && power < 50.0f  )
-       {
-           
-            StartCoroutine(Level2Attack ( ));
-       }
+    //    if ( psYellowMagicCircle.isPlaying )
+    //    {
+    //        psYellowMagicCircle.Stop ( );
+    //    }
+    //}
 
-       else if ( power >= 50.0f  )
-       {
-           
-           StartCoroutine( Level3Attack ( ));
-       }
+    //private IEnumerator GreenPowerOff ( float power )
+    //{
+    //    yield return new WaitForSeconds ( 5f );
 
-        else
-        {
-            lancerNavMesh.isStopped = false;
-        }
+    //    power = 0;
+    //    lancerNavMesh.GetComponent<Animator> ( ).SetFloat ( "Power" , power );
 
+    //    if ( psGreenBullets.isPlaying )
+    //    {
+    //        psGreenBullets.Stop ( );
+    //    }
 
+    //    yield return new WaitForSeconds ( 2f );
 
-    }
+    //    if ( psGreenMagicCircle.isPlaying )
+    //    {
+    //        psGreenMagicCircle.Stop ( );
+    //    }
 
-   
+    //}
 
-    IEnumerator Level1Attack()
-    {
-        yield return new WaitForSeconds ( 5f );
-        lancerAnim.SetTrigger("Attack 1");
-        yield return new WaitForSeconds ( 2f );
-        lancerAnim.SetFloat ( "Power" , 0 );
-    }
+    //public void Attack ( float power )
+    //{
 
-    IEnumerator Level2Attack()
-    {
-        yield return new WaitForSeconds ( 5f );
-        lancerAnim.SetTrigger ( "Attack 2" );
-        lancerAnim.SetFloat ( "Power" , 30.0f );
-               
-        yield return new WaitForSeconds ( 2f );
-       
-        lancerAnim.SetFloat ( "Power" , 0 );
+    //    if ( power < 25.0f )
+    //    {
 
-    }
+    //        StartCoroutine ( Level1Attack ( ) );
+    //        Debug.Log ( "Attack 1 started" );
 
-    IEnumerator Level3Attack()
-    {
-        yield return new WaitForSeconds ( 5f );
-        lancerAnim.SetTrigger ( "Attack 3" );
-        lancerAnim.SetFloat ( "Power" , 60.0f );
+    //    }
 
-       
-       
-        yield return new WaitForSeconds ( 2f );
-        
-        lancerAnim.SetFloat ( "Power" , 0 );
+    //}
 
+    //public void Attack2 ( float power )
+    //{
+    //    if ( power >= 25.0f && power < 50.0f )
+    //    {
+    //        StartCoroutine ( Level2Attack ( ) );
+    //        Debug.Log ( "Attack 2 started" );
+    //    }
+    //}
 
-    }
+    //public void Attack3 ( float power )
+    //{
+    //    if ( power >= 50.0f )
+    //    {
+
+    //        StartCoroutine ( Level3Attack ( ) );
+    //        Debug.Log ( "Attack 3 started" );
+    //    }
+    //}
+
+    //private IEnumerator Level1Attack ( )
+    //{
+    //    lancerAnim.SetFloat ( "Speed" , 5f );
+    //    yield return new WaitForSeconds ( 5f );
+    //    lancerAnim.SetTrigger ( "Attack 1" );
+    //    yield return new WaitForSeconds ( 10f );
+    //    lancerAnim.SetFloat ( "Power" , 0 );
+    //}
+
+    //private IEnumerator Level2Attack ( )
+    //{
+    //    lancerAnim.SetFloat ( "Speed" , 5f );
+    //    yield return new WaitForSeconds ( 5f );
+    //    lancerAnim.SetTrigger ( "Attack 2" );
+    //    lancerAnim.SetFloat ( "Power" , 30.0f );
+    //    if ( !psGreenBullets.isPlaying )
+    //    {
+    //        psGreenBullets.Play ( true );
+
+    //    }
+    //    yield return new WaitForSeconds ( 10f );
+    //    lancerAnim.SetFloat ( "Power" , 0 );
+
+    //}
+
+    //private IEnumerator Level3Attack ( )
+    //{
+    //    lancerAnim.SetFloat ( "Speed" , 5f );
+    //    yield return new WaitForSeconds ( 5f );
+    //    lancerAnim.SetTrigger ( "Attack 3" );
+    //    lancerAnim.SetFloat ( "Power" , 60.0f );
+    //    if ( !psYellowSurge.isPlaying )
+    //    {
+    //        psYellowSurge.Play ( true );
+    //    }
+    //    yield return new WaitForSeconds ( 10f );
+    //    lancerAnim.SetFloat ( "Power" , 0 );
+
+    //}
 
 }
