@@ -11,35 +11,26 @@ public class WeaponStoreController : MonoBehaviour
 {
 
     public Camera firstPersonCamera;
-    private bool isQuitting = false;
-    GameObject canvas;
-    Slider loadingBar;
-    Dropdown sceneDD;
-    Text selectedText;
-    GameObject player;
-    ARRaycastManager ARRaycastManager;
-    ARPlaneManager ARPlaneManager;
-    List<ARRaycastHit> hitList;
+    private GameObject player;
+    private ARRaycastManager ARRaycastManager;
+    private ARPlaneManager ARPlaneManager;
+    private List<ARRaycastHit> hitList;
     public GameObject weaponStoreGO;
-    GameObject weaponStore;
-    RaycastHit hit;
-    GameObject targetWeapon;
+    private GameObject weaponStore;
+    private RaycastHit hit;
+    private GameObject targetWeapon;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
-        player = GameObject.FindGameObjectWithTag("Player");
-        canvas = player.transform.Find("Canvas").gameObject;
-        loadingBar = canvas.transform.Find("ProgressBar").GetComponent<Slider>();
-        sceneDD = canvas.transform.Find("Dropdown").GetComponent<Dropdown>();
-        selectedText = canvas.transform.Find("Dropdown").transform.Find("Label").GetComponent<Text>();
-        ARRaycastManager = player.GetComponent<ARRaycastManager>();
-        ARPlaneManager = player.GetComponent<ARPlaneManager>();
-   
+        player = GameObject.FindGameObjectWithTag ( "Player" );
+        ARRaycastManager = player.GetComponent<ARRaycastManager> ( );
+        ARPlaneManager = player.GetComponent<ARPlaneManager> ( );
+
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update ( )
     {
         if ( Input.touchCount > 0 )
         {
@@ -57,53 +48,50 @@ public class WeaponStoreController : MonoBehaviour
 
             }
 
-            if (touch.phase == TouchPhase.Began)
+            if ( touch.phase == TouchPhase.Began )
             {
                 Vector3 touch3DPosition = Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, touch.position.y, 0f));
 
-                if (Physics.Raycast(touch3DPosition, Vector3.forward, out hit ))
+                if ( Physics.Raycast ( touch3DPosition , Vector3.forward , out hit ) )
                 {
                     targetWeapon = hit.collider.gameObject;
 
                 }
             }
 
-            if (ARRaycastManager.Raycast(touch.position, hitList, TrackableType.PlaneWithinBounds))
+            if ( ARRaycastManager.Raycast ( touch.position , hitList , TrackableType.PlaneWithinBounds ) )
             {
                 ARPlane arPlane = ARPlaneManager.GetPlane(hitList[0].trackableId);
 
                 Pose p = hitList[0].pose;
 
-                if (arPlane.alignment == PlaneAlignment.Vertical)
+                if ( arPlane.alignment == PlaneAlignment.Vertical )
                 {
-                    SpawnWeapon (targetWeapon, p );
+                    SpawnWeapon ( targetWeapon , p );
                 }
             }
         }
 
         Vector3 screenCenter = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-       
-        if (ARRaycastManager.Raycast(screenCenter, hitList, TrackableType.PlaneWithinBounds))
+
+        if ( ARRaycastManager.Raycast ( screenCenter , hitList , TrackableType.PlaneWithinBounds ) )
         {
             ARPlane arPlane = ARPlaneManager.GetPlane(hitList[0].trackableId);
 
             Pose p = hitList[0].pose;
 
-            if (arPlane.alignment == PlaneAlignment.HorizontalUp)
+            if ( arPlane.alignment == PlaneAlignment.HorizontalUp )
             {
-                SpawnWeaponStore(p);
+                SpawnWeaponStore ( p );
             }
 
-            
         }
-
-       
 
     }
 
-    private void SpawnWeapon ( GameObject targetWeaponGO, Pose pose )
+    private void SpawnWeapon ( GameObject targetWeaponGO , Pose pose )
     {
-        if (targetWeaponGO != null)
+        if ( targetWeaponGO != null )
         {
             Destroy ( targetWeaponGO.gameObject , 2f );
         }
@@ -112,23 +100,15 @@ public class WeaponStoreController : MonoBehaviour
         targetWeapon.SetActive ( true );
     }
 
-    private void SpawnWeaponStore(Pose p)
+    private void SpawnWeaponStore ( Pose p )
     {
-        if (weaponStore != null)
+        if ( weaponStore != null )
         {
-            Destroy(weaponStore.gameObject, 2f);
+            Destroy ( weaponStore.gameObject , 2f );
         }
 
-        weaponStore = Instantiate(weaponStoreGO, p.position, p.rotation) as GameObject;
-        weaponStore.SetActive(true);
+        weaponStore = Instantiate ( weaponStoreGO , p.position , p.rotation ) as GameObject;
+        weaponStore.SetActive ( true );
     }
 
-        
 }
-
-
-    
-
-
-
-

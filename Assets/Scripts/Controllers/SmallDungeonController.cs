@@ -6,56 +6,75 @@ using UnityEngine.XR.ARSubsystems;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AI;
 
-public class SmallDungeonController : MonoBehaviour {
-
+public class SmallDungeonController : MonoBehaviour
+{
     public Camera firstPersonCamera;
-    private bool isQuitting = false;
-    GameObject canvas;
-    Slider loadingBar;
-    Dropdown sceneDD;
-    Text selectedText;
-    ARRaycastManager ARRaycastManager;
-    ARPlaneManager ARPlaneManager;
-    List<ARRaycastHit> hitList;
-    LightEstimation lightEstimation;
-    GameObject player;
+    private ARRaycastManager ARRaycastManager;
+    private ARPlaneManager ARPlaneManager;
+    private List<ARRaycastHit> hitList;
+    private LightEstimation lightEstimation;
+    private GameObject player;
     public GameObject puzzlePortalGO;
-    GameObject puzzlePortal;
+    private GameObject puzzlePortal;
     public GameObject fireBubaGO;
-    GameObject fireBuba;
+    private GameObject fireBuba;
     public GameObject spiderGO;
-    GameObject spider;
-    public GameObject robo2GO;
-    GameObject robo2;
-    public GameObject airDroneGO;
-    GameObject airDrone;
-    public GameObject evilHandGO;
-    GameObject evilHand;
+    private GameObject spider;
     public GameObject iceDragonGO;
-    GameObject iceDragon;
+    private GameObject iceDragon;
     public GameObject coinBagGO;
-    GameObject coinBag;
+    private GameObject coinBag;
     public GameObject lancerGO;
-    GameObject lancer;
-
-
+    private GameObject lancer;
+    public GameObject smallDungeonGO;
+    private GameObject smallDungeon;
+    private GameObject playerCanvas;
+    private Image playerLifeFillImage;
+    private Slider playerMagicSlider;
+    private Text coinText;
+    private Image characterImage;
+    private PlayerData pData;
+    private Transform startPosition;
+    private Transform fireBubaStartTransform;
+    private Transform lancerStartTransform;
+    public NavMeshSurface[] surfaces;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
-        player = GameObject.FindGameObjectWithTag("Player");
-        canvas = player.transform.Find("Canvas").gameObject;
-        loadingBar = canvas.transform.Find("ProgressBar").GetComponent<Slider>();
-        sceneDD = canvas.transform.Find("Dropdown").GetComponent<Dropdown>();
-        selectedText = canvas.transform.Find("Dropdown").transform.Find("Label").GetComponent<Text>();
-        ARRaycastManager = player.GetComponent<ARRaycastManager>();
-        ARPlaneManager = player.GetComponent<ARPlaneManager>();
-        lightEstimation = player.GetComponent<LightEstimation>();
+        fireBubaStartTransform = GameObject.Find ( "Fire Buba WayPoints" ).transform.Find ( "Fire Buba Stop 1" );
+        lancerStartTransform = GameObject.Find ( "Lancer Path 1" ).transform.Find ( "Lancer WayPoint 1" );
+        playerCanvas = GameObject.FindGameObjectWithTag ( "Player Life" );
+        playerLifeFillImage = playerCanvas.transform.Find ( "Player Health Bar" ).transform.Find ( "Fill Area" ).transform.Find ( "Fill" ).GetComponent<Image> ( );
+        playerMagicSlider = playerCanvas.transform.Find ( "Magic Bar" ).GetComponent<Slider> ( );
+        coinText = playerCanvas.transform.Find ( "Coin Text" ).GetComponent<Text> ( );
+        characterImage = playerCanvas.transform.Find ( "Avatar Image" ).GetComponent<Image> ( );
+        pData = SaveLoadPlayerData.Load ( );
+        playerLifeFillImage.fillAmount = pData.lifeAmount;
+        playerMagicSlider.value = pData.magicAmount;
+        coinText.text = pData.money.ToString ( );
+        const string assetAddress = "Assets/SIMPLE Avatars Icons/64X64/";
+        Addressables.LoadAssetAsync<Sprite> ( assetAddress + pData.characterSpriteName + ".png" ).Completed += OnLoadFinished;
+        startPosition = GameObject.Find ( "Enter Portal" ).transform;
+        player = GameObject.FindGameObjectWithTag ( "Player" );
+        player.transform.position = startPosition.position;
+        ARRaycastManager = player.GetComponent<ARRaycastManager> ( );
+        ARPlaneManager = player.GetComponent<ARPlaneManager> ( );
+        lightEstimation = player.GetComponent<LightEstimation> ( );
+
+        for ( int i = 0 ; i < surfaces.Length ; i++ )
+        {
+            surfaces [ i ].BuildNavMesh ( );
+        }
+        hitList = new List<ARRaycastHit> ( );
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update ( )
     {
 
         if ( Input.touchCount > 0 )
@@ -73,191 +92,187 @@ public class SmallDungeonController : MonoBehaviour {
                 return;
 
             }
+
+            if ( touch.phase == TouchPhase.Began )
+            {
+                if ( ARRaycastManager.Raycast ( touch.position , hitList , TrackableType.PlaneWithinPolygon ) )
+                {
+                    ARPlane arPlane = ARPlaneManager.GetPlane(hitList[0].trackableId);
+
+                    Pose p = hitList[0].pose;
+
+                    if ( arPlane.alignment == PlaneAlignment.HorizontalUp )
+                    {
+                        SpawnSmallDungeon ( p );
+                    }
+
+                }
+            }
+
         }
 
+        Vector3 screenCenter = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+        if ( ARRaycastManager.Raycast ( screenCenter , hitList , TrackableType.PlaneWithinPolygon ) )
+        {
+            ARPlane arPlane = ARPlaneManager.GetPlane(hitList[0].trackableId);
 
-            Vector3 screenCenter = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-            if (ARRaycastManager.Raycast(screenCenter, hitList, TrackableType.PlaneWithinBounds))
+            Pose p = hitList[0].pose;
+
+            if ( arPlane.alignment == PlaneAlignment.HorizontalDown && lightEstimation.brightness.HasValue )
             {
-                ARPlane arPlane = ARPlaneManager.GetPlane(hitList[0].trackableId);
-
-                Pose p = hitList[0].pose;
-
-                if (arPlane.alignment == PlaneAlignment.HorizontalDown && lightEstimation.brightness.HasValue)
+                if ( lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f )
                 {
-                    if (lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f)
-                    {
-                        SpawnIceDragon(p);
-                    }
+                    SpawnIceDragon ( p );
+                }
 
-                    if (lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f)
-                    {
-                        SpawnAirDrone(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.6f)
-                    {
-                        SpawnSpider(p);
-                    }
+                if ( lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f )
+                {
 
                 }
 
-                if (arPlane.alignment == PlaneAlignment.HorizontalUp && lightEstimation.brightness.HasValue)
+                if ( lightEstimation.brightness.Value > 0.6f )
                 {
-                    if (lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f)
-                    {
-                        SpawnLancer(p);
-                    }
+                    SpawnSpider ( p );
+                }
 
-                    if (lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f)
-                    {
-                        SpawnHand(p);
-                    }
+            }
 
-                    if (lightEstimation.brightness.Value > 0.6f)
-                    {
-                        SpawnRobo2(p);
-                    }
+            if ( arPlane.alignment == PlaneAlignment.HorizontalUp && lightEstimation.brightness.HasValue )
+            {
+                if ( lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f )
+                {
+                    SpawnLancer ( p );
+                }
+
+                if ( lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f )
+                {
 
                 }
 
-                if (arPlane.alignment == PlaneAlignment.Vertical && lightEstimation.brightness.HasValue)
+                if ( lightEstimation.brightness.Value > 0.6f )
                 {
-                    if (lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f)
-                    {
-                        SpawnPuzzlePortal(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f)
-                    {
-                        SpawnFireBuba(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.6f)
-                    {
-                        SpawnCoinBag(p);
-                    }
 
                 }
 
             }
 
-
-
-            // Exit the app when the 'back' button is pressed.
-            if (Input.GetKey(KeyCode.Escape))
+            if ( arPlane.alignment == PlaneAlignment.Vertical && lightEstimation.brightness.HasValue )
             {
-                Application.Quit();
+                if ( lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f )
+                {
+                    SpawnPuzzlePortal ( p );
+                }
+
+                if ( lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f )
+                {
+                    SpawnFireBuba ( p );
+                }
+
+                if ( lightEstimation.brightness.Value > 0.6f )
+                {
+                    SpawnCoinBag ( p );
+                }
+
             }
 
-            // Get updated augmented images for this frame.
-
-
-
-        
-
-
-    }
-
-    private void SpawnPuzzlePortal(Pose p)
-    {
-        if (puzzlePortal != null)
-        {
-            Destroy(puzzlePortal.gameObject, 2f);
         }
 
-        puzzlePortal = Instantiate(puzzlePortalGO, p.position, p.rotation) as GameObject;
-        puzzlePortal.SetActive(true);
     }
 
-    private void SpawnFireBuba(Pose p)
+    private void OnLoadFinished ( AsyncOperationHandle<Sprite> obj )
     {
-        if (fireBuba != null)
+        characterImage.sprite = obj.Result;
+    }
+
+    private void SpawnSmallDungeon ( Pose p )
+    {
+        if ( smallDungeon != null )
         {
-            Destroy(fireBuba.gameObject, 2f);
+            Destroy ( smallDungeon.gameObject , 2f );
         }
 
-        fireBuba = Instantiate(fireBubaGO, p.position, p.rotation) as GameObject;
-        fireBuba.SetActive(true);
+        smallDungeon = Instantiate ( smallDungeonGO , p.position , p.rotation ) as GameObject;
+        smallDungeon.SetActive ( true );
     }
 
-    private void SpawnSpider(Pose p)
+    private void SpawnPuzzlePortal ( Pose p )
     {
-        if (spider != null)
+        if ( puzzlePortal != null )
         {
-            Destroy(spider.gameObject, 2f);
+            Destroy ( puzzlePortal.gameObject , 2f );
         }
 
-        spider = Instantiate(spiderGO, p.position, p.rotation) as GameObject;
-        spider.SetActive(true);
+        puzzlePortal = Instantiate ( puzzlePortalGO , p.position , p.rotation ) as GameObject;
+        puzzlePortal.SetActive ( true );
     }
 
-    private void SpawnRobo2(Pose p)
+    private void SpawnFireBuba ( Pose p )
     {
-        if (robo2 != null)
+        if ( fireBuba != null )
         {
-            Destroy(robo2.gameObject, 2f);
+            Destroy ( fireBuba.gameObject , 2f );
         }
 
-        robo2 = Instantiate(robo2GO, p.position, p.rotation) as GameObject;
-        robo2.SetActive(true);
+        fireBuba = Instantiate ( fireBubaGO , p.position , p.rotation ) as GameObject;
+        fireBuba.SetActive ( true );
+
+        NavMeshAgent fBubaAgent = fireBuba.GetComponent<NavMeshAgent>();
+
+        if ( fBubaAgent.Warp ( fireBubaStartTransform.position ) )
+        {
+            fBubaAgent.isStopped = false;
+        }
     }
 
-    private void SpawnAirDrone(Pose p)
+    private void SpawnSpider ( Pose p )
     {
-        if (airDrone != null)
+        if ( spider != null )
         {
-            Destroy(airDrone.gameObject, 2f);
+            Destroy ( spider.gameObject , 2f );
         }
 
-        airDrone = Instantiate(airDroneGO, p.position, p.rotation) as GameObject;
-        airDrone.SetActive(true);
+        spider = Instantiate ( spiderGO , p.position , p.rotation ) as GameObject;
+        spider.SetActive ( true );
     }
 
-    private void SpawnHand(Pose p)
+    private void SpawnIceDragon ( Pose p )
     {
-        if (evilHand != null)
+        if ( iceDragon != null )
         {
-            Destroy(evilHand.gameObject, 2f);
+            Destroy ( iceDragon.gameObject , 2f );
         }
 
-        evilHand = Instantiate(evilHandGO, p.position, p.rotation) as GameObject;
-        evilHand.SetActive(true);
+        iceDragon = Instantiate ( iceDragonGO , p.position , p.rotation ) as GameObject;
+        iceDragon.SetActive ( true );
     }
 
-    private void SpawnIceDragon(Pose p)
+    private void SpawnCoinBag ( Pose p )
     {
-        if (iceDragon != null)
+        if ( coinBag != null )
         {
-            Destroy(iceDragon.gameObject, 2f);
+            Destroy ( coinBag.gameObject , 2f );
         }
 
-        iceDragon = Instantiate(iceDragonGO, p.position, p.rotation) as GameObject;
-        iceDragon.SetActive(true);
+        coinBag = Instantiate ( coinBagGO , p.position , p.rotation ) as GameObject;
+        coinBag.SetActive ( true );
     }
 
-    private void SpawnCoinBag(Pose p)
+    private void SpawnLancer ( Pose p )
     {
-        if (coinBag != null)
+        if ( lancer != null )
         {
-            Destroy(coinBag.gameObject, 2f);
+            Destroy ( lancer.gameObject , 2f );
         }
 
-        coinBag = Instantiate(coinBagGO, p.position, p.rotation) as GameObject;
-        coinBag.SetActive(true);
-    }
+        lancer = Instantiate ( lancerGO , p.position , p.rotation ) as GameObject;
+        lancer.SetActive ( true );
 
-    private void SpawnLancer(Pose p)
-    {
-        if (lancer != null)
+        NavMeshAgent lancerAgent = lancer.GetComponent<NavMeshAgent>();
+
+        if ( lancerAgent.Warp ( lancerStartTransform.position ) )
         {
-            Destroy(lancer.gameObject, 2f);
+            lancerAgent.isStopped = false;
         }
-
-        lancer = Instantiate(lancerGO, p.position, p.rotation) as GameObject;
-        lancer.SetActive(true);
     }
 
-    
-	
 }
