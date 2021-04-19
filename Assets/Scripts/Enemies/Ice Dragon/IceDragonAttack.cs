@@ -5,56 +5,55 @@ using UnityEngine.AI;
 
 public class IceDragonAttack : MonoBehaviour
 {
-    Animator iDragonAnim;
-    NavMeshAgent iDragonNavMesh;
-    float distance;
-    GameObject player;
+
+    private Animator iDragonAnim;
+    public GameObject iceFlameGO;
+    private GameObject iceFlame;
+    private Transform iceSpot;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
+        iDragonAnim = GetComponent<Animator> ( );
+        iceSpot = transform.Find ( "Ice Spot" );
 
-        iDragonAnim = GetComponent<Animator>();
-        iDragonNavMesh = GetComponent<NavMeshAgent>();
-        player = GameObject.FindGameObjectWithTag("Player");
     }
 
-    public void Attack()
+    private void Update ( )
     {
-        iDragonNavMesh.velocity = Vector3.zero;
-        iDragonAnim.SetBool("Flying", true);
-        distance = Vector3.Distance(iDragonNavMesh.gameObject.transform.position, player.transform.position);
-
-        if (distance >= 1f)
+        if ( iDragonAnim.GetCurrentAnimatorStateInfo ( 0 ).IsName ( "fly breath ice" ) )
         {
-            BreathFire();
-        }
+            if ( iceFlame == null )
+            {
+                iceFlame = Instantiate ( iceFlameGO ) as GameObject;
+                iceFlame.transform.parent = iceSpot;
+                iceFlame.transform.localPosition = Vector3.zero;
+                iceFlame.transform.localRotation = Quaternion.identity;
 
-        else if (distance > 0.5f && distance < 1)
-        {
-            FlyAttack();
-        }
+            }
 
-        else
-        {
-            FlyHit();
+            if ( iceFlame.CompareTag ( "Ice Blast" ) )
+            {
+                Breathice ( iceFlame );
+            }
         }
 
     }
 
-    private void BreathFire()
+    private void Breathice ( GameObject iceFlame )
     {
-        iDragonAnim.SetTrigger("breath ice");
+        ParticleSystem psiceFlame = iceFlame.GetComponent<ParticleSystem> ( );
+        ParticleSystem psiceBlast = iceFlame.transform.Find("SubBlast01_ice").GetComponent<ParticleSystem>();
+
+        if ( !psiceFlame.isPlaying )
+        {
+            psiceFlame.Play ( );
+        }
+
+        if ( !psiceBlast.isPlaying )
+        {
+            psiceBlast.Play ( );
+        }
     }
 
-    private void FlyHit()
-    {
-        iDragonAnim.SetTrigger("hit");
-
-    }
-
-    private void FlyAttack()
-    {
-        iDragonAnim.SetTrigger("head butt");
-    }
 }

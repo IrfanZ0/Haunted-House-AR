@@ -1,77 +1,79 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GhostHealth : MonoBehaviour
 {
-    Slider lifeSlider;
-    Animator ghostAnim;
-    public GameObject explosion;
-    AudioSource bulletExplosionSound;
-    ParticleSystem bulletPS;
-    AudioSource swordStrikeSound;
-    public GameObject magicSword;
-    AudioSource[] aSource;
-    public GameObject chargedBoltSpell;
-    ParticleSystem chargedBallSpellPS;
-    AudioSource chargedBallSound;
+    private Slider lifeSlider;
+    private Animator ghostAnim;
+    private Image fill;
+    private float current_health;
+    private float total_health = 50f;
+    public GameObject[] prizesList;
+    private int prizeNum;
+    private GameObject selectedPrize;
+    public GameObject blueDiamond;
+    public GameObject orangeDiamond;
+    public GameObject redDiamond;
+    public GameObject silverDiamond;
+    public GameObject violetDiamond;
+    public GameObject yellowDiamond;
+    public GameObject coinBag;
+    public GameObject treasureChest;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
-        lifeSlider = gameObject.GetComponentInChildren<Slider>();
-        ghostAnim = gameObject.GetComponent<Animator>();
-        bulletPS = explosion.GetComponentInChildren<ParticleSystem>();
-        bulletExplosionSound = explosion.GetComponent<AudioSource>();
-        aSource = new AudioSource[2];
+        lifeSlider = GetComponent<Slider> ( );
+        ghostAnim = gameObject.GetComponentInParent<Animator> ( );
+        current_health = total_health;
+        prizesList = new GameObject [ ] { blueDiamond , orangeDiamond , redDiamond , silverDiamond , violetDiamond , yellowDiamond , coinBag , treasureChest };
+        prizeNum = Mathf.RoundToInt ( UnityEngine.Random.Range ( 0 , prizesList.Length ) );
+        selectedPrize = GhostPrize ( prizesList , prizeNum ) as GameObject;
+        selectedPrize.transform.parent = transform.root;
+        selectedPrize.SetActive ( false );
 
-        for (int i = 0; i < aSource.Length; i++)
+    }
+
+    public void Damage ( float damage )
+    {
+        current_health -= damage;
+
+        if ( current_health <= 0 )
         {
-            AudioSource audioTemp = magicSword.GetComponentInChildren<AudioSource>();
-            aSource[i] = audioTemp;
+            GhostDeath ( );
+            selectedPrize.transform.parent = null;
+            selectedPrize.SetActive ( true );
 
-            if (aSource[i].clip.name == "Swords Collide")
+        }
+
+    }
+
+    private void GhostDeath ( )
+    {
+        float ghostDeathTime = ghostAnim.GetCurrentAnimatorClipInfo ( 0 )[0].clip.length;
+        Destroy ( transform.root.gameObject , ghostDeathTime + 2f );
+        ghostAnim.SetBool ( "Dead_Ghost" , true );
+    }
+
+    private void Update ( )
+    {
+        lifeSlider.value = current_health;
+    }
+
+    private GameObject GhostPrize ( GameObject [ ] prizes , int numPrize )
+    {
+        GameObject prizeTemp = null;
+
+        for ( int i = 0 ; i < prizes.Length ; i++ )
+        {
+            if ( i == numPrize )
             {
-                swordStrikeSound = aSource[i];
+                prizeTemp = Instantiate ( prizes [ i ] , transform.position , Quaternion.identity ) as GameObject;
             }
-        }
-
-        chargedBallSpellPS = chargedBoltSpell.transform.Find("ChargedBoltStart").transform.Find("ChargedBoltEmissionParticleSystem").GetComponent<ParticleSystem>();
-        chargedBallSound = chargedBoltSpell.transform.Find("ChargedBoltStart").transform.Find("ChargedBoltSound").GetComponent<AudioSource>();
-
-    }
-    void OnCollisionEnter(Collision coll)
-    {
-        if (coll.collider.CompareTag("Bullets"))
-        {
-            Damage(1f);
 
         }
 
-        if (coll.collider.CompareTag("Magic Sword"))
-        {
-            Damage(1f);
-
-        }
-
-        if (coll.collider.CompareTag("Lightning Bolt"))
-        {
-            Damage(3f);
-
-        }
-    }
-
-    public void Damage(float damage)
-    {
-        lifeSlider.value -= 3f;
-        ghostAnim.SetTrigger("Damage");
-
-        if (lifeSlider.value < 1f)
-        {
-            ghostAnim.SetBool("isDead", true);
-            Destroy(gameObject, 2f);
-        }
-
+        return prizeTemp;
     }
 }
