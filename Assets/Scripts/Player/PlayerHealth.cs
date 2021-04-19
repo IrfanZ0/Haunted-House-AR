@@ -5,73 +5,55 @@ using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    Slider lifeSlider;
-    GameObject tmp;
-    GameObject playerPanel;
-    float currentHealth;
-    float totalHealth;
-    GameObject gameOverCanvas;
-    CanvasGroup gameOverCanvasGroup;
-    AudioSource gameOverMusic;
+    private Slider lifeSlider;
+    private float current_health;
+    private float total_health;
+    private GameObject gameOverCanvas;
+    private CanvasGroup gameOverCanvasGroup;
+    private AudioSource gameOverMusic;
+    private Image fill;
+    private Animator playerAnim;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
-        gameOverMusic = gameOverCanvas.GetComponent<AudioSource> ( );
         gameOverCanvas = GameObject.Find ( "Game Over Canvas" );
-        gameOverCanvasGroup = gameOverCanvas.GetComponent<CanvasGroup> ( );
-        lifeSlider = GameObject.Find("Player Life Canvas").transform.Find("Player Health Bar").GetComponent<Slider>();
-        tmp = GameObject.FindGameObjectWithTag("Player").transform.Find("Canvas").transform.Find("Panel").transform.Find("Game Over Text").gameObject;
-        playerPanel = GameObject.FindGameObjectWithTag("Player").transform.Find("Canvas").transform.Find("Panel").gameObject;
-        totalHealth = 100f;
-        currentHealth = totalHealth;
+
+        if ( gameOverCanvas != null )
+        {
+            gameOverMusic = gameOverCanvas.GetComponent<AudioSource> ( );
+            gameOverCanvasGroup = gameOverCanvas.GetComponent<CanvasGroup> ( );
+        }
+
+        lifeSlider = GetComponent<Slider> ( );
+        fill = lifeSlider.transform.Find ( "Fill Area" ).transform.Find ( "Fill" ).GetComponent<Image> ( );
+        total_health = 100f;
+        current_health = total_health;
+        playerAnim = GetComponent<Animator> ( );
     }
-    void OnCollisionEnter(Collision coll)
+
+    private void Update ( )
     {
-        if (coll.collider.CompareTag("Bullets"))
-        {
-            Damage(1f);
-
-        }
-
-        if (coll.collider.CompareTag("Magic Sword"))
-        {
-            Damage(1f);
-
-        }
-
-        if (coll.collider.CompareTag("Lightning Bolt"))
-        {
-            Damage(3f);
-
-        }
-
-       
+        fill.fillAmount = current_health;
     }
 
-    public void Damage(float damage)
+    public void Damage ( float damage )
     {
-        currentHealth -= damage;
+        current_health -= damage;
 
-        if (currentHealth % 10.0f == 0)
+        if ( current_health <= 0 )
         {
-            Image lifeBarImage = lifeSlider.transform.Find ( "Fill Area" ).transform.Find ( "Fill" ).GetComponent<Image> ( );
-            lifeBarImage.fillAmount -= 0.1f;
-        }
-      
+            PlayerDeath ( );
 
-        if (lifeSlider.value < 1f)
-        {
-            gameOverCanvasGroup.alpha = 1f;
-
-            if (!gameOverMusic.isPlaying)
-            {
-                gameOverMusic.Play ( );
-            }
-            Destroy(gameObject, 2f);
         }
 
     }
 
-   
+    private void PlayerDeath ( )
+    {
+        playerAnim.SetBool ( "isDead" , true );
+        float playerDeathTime = playerAnim.GetCurrentAnimatorStateInfo ( 0 ).length;
+        Destroy ( gameObject , 2f );
+    }
+
 }
