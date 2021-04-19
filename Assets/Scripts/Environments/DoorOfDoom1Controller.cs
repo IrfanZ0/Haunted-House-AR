@@ -4,53 +4,66 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using UnityEngine.AI;
+using System;
 
 public class DoorOfDoom1Controller : MonoBehaviour
 {
-    GameObject player;
-    ARRaycastManager ARRaycastManager;
-    ARPlaneManager ARPlaneManager;
-    List<ARRaycastHit> hitList;
-    LightEstimation lightEstimation;
+    private GameObject player;
+    private ARRaycastManager ARRaycastManager;
+    private ARPlaneManager ARPlaneManager;
+    private List<ARRaycastHit> hitList;
+    private LightEstimation lightEstimation;
+    public GameObject lancerGO;
+    private GameObject lancer;
     public GameObject ghostGO;
-    GameObject ghost;
+    private GameObject ghost;
     public GameObject batGO;
-    GameObject bat;
+    private GameObject bat;
     public GameObject spiderGO;
-    GameObject spider;
+    private GameObject spider;
     public GameObject skeletonGO;
-    GameObject skeleton;
+    private GameObject skeleton;
     public GameObject landDroneGO;
-    GameObject landDrone;
+    private GameObject landDrone;
     public GameObject lightningBubaGO;
-    GameObject lightningBuba;
+    private GameObject lightningBuba;
     public GameObject puzzlePortalGO;
-    GameObject puzzlePortal;
+    private GameObject puzzlePortal;
     public GameObject robo1GO;
-    GameObject robo1;
+    private GameObject robo1;
     public GameObject treasureBoxGO;
-    GameObject treasureBox;
+    private GameObject treasureBox;
     public Camera firstPersonCamera;
-    private bool isQuitting = false;
-    GameObject canvas;
-    AudioSource hauntedMusic;
-    
+    private GameObject canvas;
+    private AudioSource hauntedMusic;
+    private AudioSource successMusic;
+    private Transform spiderStartPoint;
+    private Transform batStartPoint;
+    private Transform ghostStartPoint;
+    private Transform lancerStartPoint;
+    private GameObject ringOfFire;
 
-    void Start ( )
+    private void Start ( )
     {
         player = GameObject.FindGameObjectWithTag ( "Player" );
-        canvas = player.transform.Find ( "Canvas" ).gameObject;
         ARRaycastManager = player.GetComponent<ARRaycastManager> ( );
         ARPlaneManager = player.GetComponent<ARPlaneManager> ( );
         lightEstimation = player.GetComponent<LightEstimation> ( );
         hauntedMusic = GetComponent<AudioSource> ( );
-
-
+        successMusic = GetComponent<AudioSource> ( );
+        spiderStartPoint = GameObject.Find ( "Door of Doom 1" ).transform.Find ( "Spider web_3" );
+        batStartPoint = GameObject.Find ( "Door of Doom 1" ).transform.Find ( "Bat Start Spot" );
+        ghostStartPoint = GameObject.Find ( "Door of Doom 1" ).transform.Find ( "Ghost Start Spot" );
+        lancer = GameObject.FindGameObjectWithTag ( "Lancer" );
+        lancerStartPoint = GameObject.Find ( "Door of Doom 1" ).transform.Find ( "Lancer Start Spot" );
+        ringOfFire = GameObject.Find ( "Door of Doom 1" ).transform.Find ( "chest_close" ).gameObject;
     }
+
     // Update is called once per frame
-    void Update ( )
+    private void Update ( )
     {
-        
+
         if ( Input.touchCount > 0 )
         {
 
@@ -66,8 +79,11 @@ public class DoorOfDoom1Controller : MonoBehaviour
                 return;
 
             }
-        }
 
+            if ( spider != null )
+            {
+            }
+        }
 
         Vector3 screenCenter = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
         if ( ARRaycastManager.Raycast ( screenCenter , hitList , TrackableType.PlaneWithinBounds ) )
@@ -135,23 +151,70 @@ public class DoorOfDoom1Controller : MonoBehaviour
 
         }
 
-
-
-        // Exit the app when the 'back' button is pressed.
-        if ( Input.GetKey ( KeyCode.Escape ) )
+        if ( lancer.GetComponent<Animator> ( ).GetCurrentAnimatorStateInfo ( 0 ).IsName ( "isDead_Lancer" ) )
         {
-            Application.Quit ( );
+            StartCoroutine ( RevealTreasure ( ringOfFire ) );
+
         }
-
-        // Get updated augmented images for this frame.
-
-
-
-
 
     }
 
+    private IEnumerator RevealTreasure ( GameObject ringOfFire )
+    {
 
+        ParticleSystem psRingFire = ringOfFire.transform.Find("RingOfFireFlame").GetComponent<ParticleSystem>();
+        if ( psRingFire.isPlaying )
+        {
+            psRingFire.Stop ( );
+        }
+
+        ParticleSystem psRingFireSecondary = ringOfFire.transform.Find("RingOfFireSecondaryFlame").GetComponent<ParticleSystem>();
+        if ( psRingFireSecondary.isPlaying )
+        {
+            psRingFireSecondary.Stop ( );
+        }
+
+        AudioSource ringFireSound = ringOfFire.transform.Find("RingOfFireSound").GetComponent<AudioSource>();
+
+        if ( ringFireSound.isPlaying )
+        {
+            ringFireSound.Stop ( );
+        }
+
+        ParticleSystem psRingFireSparks = ringOfFire.transform.Find("RingOfFireSparks").GetComponent<ParticleSystem>();
+
+        if ( psRingFireSparks.isPlaying )
+        {
+            psRingFireSparks.Stop ( );
+        }
+
+        ParticleSystem psRingFireSSmoke =  ringOfFire.transform.Find("RingOfFireSmoke").GetComponent<ParticleSystem>();
+
+        if ( psRingFireSSmoke.isPlaying )
+        {
+            psRingFireSSmoke.Stop ( );
+        }
+
+        yield return new WaitForSeconds ( 2f );
+
+        if ( successMusic.clip.name == "SpookyMansionMusic-Success" && !successMusic.isPlaying )
+        {
+            successMusic.Play ( );
+        }
+
+    }
+
+    private void SpawnLancer ( Pose p )
+    {
+        if ( lancer != null )
+        {
+            Destroy ( lancer.gameObject , 2f );
+        }
+
+        lancer = Instantiate ( lancerGO , p.position , p.rotation ) as GameObject;
+        lancer.SetActive ( true );
+        lancer.GetComponent<NavMeshAgent> ( ).Warp ( lancerStartPoint.position );
+    }
 
     private void SpawnPuzzlePortal ( Pose p )
     {
@@ -184,6 +247,8 @@ public class DoorOfDoom1Controller : MonoBehaviour
 
         spider = Instantiate ( spiderGO , p.position , p.rotation ) as GameObject;
         spider.SetActive ( true );
+        spider.GetComponent<NavMeshAgent> ( ).Warp ( spiderStartPoint.position );
+        spider.GetComponent<Animator> ( ).SetBool ( "spiderWalk" , true );
     }
 
     private void SpawnRobo1 ( Pose p )
@@ -210,13 +275,15 @@ public class DoorOfDoom1Controller : MonoBehaviour
 
     private void SpawnBat ( Pose p )
     {
-        if ( puzzlePortal != null )
+        if ( bat != null )
         {
-            Destroy ( puzzlePortal.gameObject , 2f );
+            Destroy ( bat.gameObject , 2f );
         }
 
-        puzzlePortal = Instantiate ( puzzlePortalGO , p.position , p.rotation ) as GameObject;
-        puzzlePortal.SetActive ( true );
+        bat = Instantiate ( batGO , p.position , p.rotation ) as GameObject;
+        bat.SetActive ( true );
+        bat.GetComponent<NavMeshAgent> ( ).Warp ( batStartPoint.position );
+        bat.GetComponent<Animator> ( ).SetBool ( "Bat Fly" , true );
     }
 
     private void SpawnGhost ( Pose p )
@@ -228,6 +295,7 @@ public class DoorOfDoom1Controller : MonoBehaviour
 
         ghost = Instantiate ( ghostGO , p.position , p.rotation ) as GameObject;
         ghost.SetActive ( true );
+        ghost.GetComponent<NavMeshAgent> ( ).Warp ( ghostStartPoint.position );
     }
 
     private void SpawnTreasureBox ( Pose p )
