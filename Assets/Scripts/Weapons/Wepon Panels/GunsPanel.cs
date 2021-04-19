@@ -7,72 +7,60 @@ using Newtonsoft.Json;
 
 public class GunsPanel : MonoBehaviour
 {
-    Animator gunsAnim;
-    GameObject gunSlotGO;
+    private Animator gunsAnim;
+    private GameObject gunSlotGO;
     private Image gunIcon;
-    Sprite gunSprite;
+    private Sprite gunSprite;
     private Image typeImage;
-    Sprite typeSprite;
-    Text gunName;
-    //private GameObject gunSlot;
-    //Transform _slots;
-    //string jsonPath;
-    //Inventory weaponList;
-    //string iconPath;
-    //FileStream fStream;
-    //FileStream jsonStream;
-    //string typePath;
-    //List<string> weapons;
-    //JsonWriter jWriter;
-    //JsonReader jReader;
+    private Sprite typeSprite;
+    private Text gunName;
+
     public GameObject gunButtonGO;
     public Sprite maulerSprite;
-   
-    
-
+    public Sprite hellwailerSprite;
+    public Sprite fireSleetSprite;
+    public Sprite archtronicSprite;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start ( )
     {
-        gunsAnim = GetComponent<Animator>();
-        //jsonPath = Path.Combine(Application.dataPath, "ExternalDocs//Weapon_Inventory.xml");
-        //jsonStream = new FileStream(jsonPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        //weaponList = Inventory.CreateFromJSON(jsonPath);
-        //iconPath = Path.Combine(Application.dataPath, "//Images");
-        //fStream = new FileStream(iconPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        //typePath = Path.Combine(Application.dataPath, "//Resources//Core//QIS");
-        //weapons = new List<string>();
+        gunsAnim = GetComponent<Animator> ( );
 
-        AddNewGun ( maulerSprite , 1 , "Mauler" );
+        AddNewGunButton ( maulerSprite , 1 , "mauler" );
+
     }
 
-    public void OpenGunsPanel()
+    public void OpenGunsPanel ( )
     {
-        gunsAnim.SetBool("isOpen", true);
+        gunsAnim.SetBool ( "isOpen" , true );
     }
 
-    public void CloseGunsPanel()
+    public void CloseGunsPanel ( )
     {
-        gunsAnim.SetBool("isOpen", false);
+        gunsAnim.SetBool ( "isOpen" , false );
     }
 
-   
-    public void AddNewGun(Sprite gunSprite, int quantity, string gunName)
+    public void AddNewGunButton ( Sprite gunSprite , int quantity , string gunName )
     {
-        GameObject newGunButtonGO = Instantiate(gunButtonGO, transform) as GameObject;
-        Button newGunButton = newGunButtonGO.transform.Find("Button").GetComponent<Button>();
+        GameObject newGunButtonGO = Instantiate(gunButtonGO) as GameObject;
+        newGunButtonGO.transform.localPosition = Vector3.zero;
+        newGunButtonGO.transform.localScale = new Vector3 ( .033f , .033f , .033f );
+        newGunButtonGO.transform.rotation = Quaternion.identity;
 
-        Image newGunButtonImage = newGunButtonGO.transform.Find("Button").GetComponent<Image> ( );
+        Image newGunButtonImage = newGunButtonGO.transform.Find("Weapon Image").GetComponent<Image> ( );
         newGunButtonImage.sprite = gunSprite;
 
-        Text newGunText = newGunButton.transform.Find("Name Text").GetComponent<Text>();
+        Text newGunText = newGunButtonGO.transform.Find("Name Text").GetComponent<Text>();
         newGunText.text = gunName;
 
         Text quantityText = newGunButtonGO.transform.Find ( "Quantity Text" ).GetComponent<Text> ( );
-        quantityText.text = quantity.ToString();
+        quantityText.text = quantity.ToString ( );
 
-       
-    }                                      
+        GameObject scrollBarContent = transform.parent.Find("Scroll View").transform.Find("Viewport").transform.Find("Content").gameObject;
+        newGunButtonGO.transform.parent = scrollBarContent.transform;
+
+    }
+
     //private void SaveNewGun(Sprite gunSprite, Sprite typeSprite, string gunName)
     //{
     //    weaponList.name = gunName;
@@ -119,6 +107,5 @@ public class GunsPanel : MonoBehaviour
     //        }
     //    }
 
-       
     //}
 }

@@ -7,14 +7,15 @@ using UnityEngine.UI;
 
 public class ShieldPanel : MonoBehaviour
 {
-    Animator shieldAnim;
-    GameObject shieldSlotGO;
+    private Animator shieldAnim;
+    private GameObject shieldSlotGO;
     private Image shieldIcon;
-    Sprite shieldSprite;
+    private Sprite shieldSprite;
     private Image typeImage;
-    Sprite typeSprite;
-    Text shieldName;
+    private Sprite typeSprite;
+    private Text shieldName;
     private GameObject shieldSlot;
+
     //Transform _slots;
     //string jsonPath;
     //Inventory weaponList;
@@ -26,40 +27,44 @@ public class ShieldPanel : MonoBehaviour
     //JsonWriter jWriter;
     //JsonReader jReader;
     public GameObject shieldButtonGO;
-    
 
     // Start is called before the first frame update
-    void Start()
+    private void Start ( )
     {
-        shieldAnim = GetComponent<Animator>();
-        
+        shieldAnim = GetComponent<Animator> ( );
+
     }
 
-    public void OpenShieldPanel()
+    public void OpenShieldPanel ( )
     {
-        shieldAnim.SetBool("isOpen", true);
+        shieldAnim.SetBool ( "isOpen" , true );
     }
 
-    public void CloseShieldPanel()
+    public void CloseShieldPanel ( )
     {
-        shieldAnim.SetBool("isOpen", false);
+        shieldAnim.SetBool ( "isOpen" , false );
     }
 
-    public void AddNewShield(Sprite shieldSprite, int quantity, string shieldName)
+    public void AddNewShieldButton ( Sprite shieldSprite , int quantity , string shieldName )
     {
-        GameObject newShieldButtonGO = Instantiate(shieldButtonGO, transform) as GameObject;
-        Button newShieldButton = newShieldButtonGO.transform.Find("Button").GetComponent<Button>();
+        GameObject newShieldButtonGO = Instantiate(shieldButtonGO) as GameObject;
+        newShieldButtonGO.transform.localScale = new Vector3 ( 0.033f , 0.033f , 0.033f );
+        newShieldButtonGO.transform.rotation = Quaternion.Euler ( 0 , -90f , 0 );
 
-        Image newShieldButtonImage = newShieldButtonGO.transform.Find("Button").GetComponent<Image> ( );
+        Image newShieldButtonImage = newShieldButtonGO.transform.Find("Weapon Image").GetComponent<Image> ( );
         newShieldButtonImage.sprite = shieldSprite;
 
-        Text newShieldText = newShieldButton.transform.Find("Name Text").GetComponent<Text>();
+        Text newShieldText = newShieldButtonGO.transform.Find("Name Text").GetComponent<Text>();
         newShieldText.text = shieldName;
 
         Text quantityText = newShieldButtonGO.transform.Find ( "Quantity Text" ).GetComponent<Text> ( );
-        quantityText.text = quantity.ToString();
+        quantityText.text = quantity.ToString ( );
+
+        GameObject scrollBarContent = transform.parent.Find("Scroll View").transform.Find("Viewport").transform.Find("Content").gameObject;
+        newShieldButtonGO.transform.parent = scrollBarContent.transform;
 
     }
+
     //private void SaveNewshield(Sprite shieldSprite, Sprite typeSprite, string shieldName)
     //{
     //    weaponList.name = shieldName;
@@ -105,7 +110,6 @@ public class ShieldPanel : MonoBehaviour
     //            }
     //        }
     //    }
-
 
     //}
 

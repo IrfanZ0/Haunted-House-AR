@@ -1,35 +1,54 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ShowInventory : MonoBehaviour
 {
-    CanvasGroup canvasGroup;
-    Text weaponButtonText;
+    private GameObject inventoryGO;
+    private CanvasGroup inventoryToggleGroup;
+    private GameObject weaponToggleGO;
+    private CanvasGroup weaponToggleCanvasGroup;
+    private Text weaponSelectionButtonText;
 
     // Start is called before the first frame update
-    void Start()
+    private void Awake ( )
     {
-        canvasGroup = GetComponent<CanvasGroup> ( );
-        weaponButtonText = GameObject.Find ( "Weapon UI Canvas" ).transform.Find ( "Weapon UI Panel" ).transform.Find ( "Weapon Slection Panel" ).transform.Find ( "Text" ).GetComponent<Text> ( );
+        HideInventory ( );
+
     }
 
-   public void ViewInventory()
-   {
-        canvasGroup.alpha = 1.0f;
-        weaponButtonText.text = "Hide Weapons";
-   }
-
-    public void HideInventory()
+    private void ViewInventory ( )
     {
-        canvasGroup.alpha = 0.1f;
-        weaponButtonText.text = "Show Weapons";
+        inventoryGO = GameObject.FindGameObjectWithTag ( "Weapon Inventory" );
+        inventoryToggleGroup = inventoryGO.GetComponent<CanvasGroup> ( );
+        inventoryToggleGroup.alpha = 1f;
+
+        weaponToggleGO = GameObject.FindGameObjectWithTag ( "Weapon Toggle" );
+        weaponToggleCanvasGroup = weaponToggleGO.GetComponent<CanvasGroup> ( );
+        weaponToggleCanvasGroup.alpha = 1f;
+        weaponSelectionButtonText = transform.Find ( "Label" ).GetComponent<Text> ( );
+        weaponSelectionButtonText.text = "Hide Weapons";
     }
 
-    public void OnValueChanged(Toggle weaponToggle)
+    private void HideInventory ( )
     {
-        if (weaponToggle.isOn)
+        inventoryGO = GameObject.FindGameObjectWithTag ( "Weapon Inventory" );
+        inventoryToggleGroup = inventoryGO.GetComponent<CanvasGroup> ( );
+        inventoryToggleGroup.alpha = 0.05f;
+
+        weaponToggleGO = GameObject.FindGameObjectWithTag ( "Weapon Toggle" );
+        weaponToggleCanvasGroup = weaponToggleGO.GetComponent<CanvasGroup> ( );
+        weaponToggleCanvasGroup.alpha = 0.05f;
+        weaponSelectionButtonText = transform.Find ( "Label" ).GetComponent<Text> ( );
+        weaponSelectionButtonText.text = "Show Weapons";
+    }
+
+    public void OnValueChanged ( bool weaponToggleOn )
+    {
+
+        if ( weaponToggleOn )
         {
             ViewInventory ( );
         }

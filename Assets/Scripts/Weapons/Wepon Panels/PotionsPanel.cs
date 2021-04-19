@@ -5,17 +5,17 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 public class PotionsPanel : MonoBehaviour
 {
-    Animator potionsAnim;
-    GameObject potionsSlotGO;
+    private Animator potionsAnim;
+    private GameObject potionsSlotGO;
     private Image potionsIcon;
-    Sprite potionsSprite;
+    private Sprite potionsSprite;
     private Image typeImage;
-    Sprite typeSprite;
-    Text potionsName;
+    private Sprite typeSprite;
+    private Text potionsName;
     private GameObject potionsSlot;
+
     //Transform _slots;
     //string jsonPath;
     //Inventory weaponList;
@@ -28,41 +28,42 @@ public class PotionsPanel : MonoBehaviour
     //JsonReader jReader;
     public GameObject potionButtonGO;
 
-
     // Start is called before the first frame update
-    void Start()
+    private void Start ( )
     {
-        potionsAnim = GetComponent<Animator>();
-        
+        potionsAnim = GetComponent<Animator> ( );
+
     }
 
-    public void OpenPotionsPanel()
+    public void OpenPotionsPanel ( )
     {
-        potionsAnim.SetBool("isOpen", true);
+        potionsAnim.SetBool ( "isOpen" , true );
     }
 
-    public void ClosePotionsPanel()
+    public void ClosePotionsPanel ( )
     {
-        potionsAnim.SetBool("isOpen", false);
+        potionsAnim.SetBool ( "isOpen" , false );
     }
 
-    public void AddNewPotions(Sprite potionsSprite, int quantity, string potionsName)
+    public void AddNewPotionsButton ( Sprite potionsSprite , int quantity , string potionsName )
     {
-        GameObject newPotionButtonGO = Instantiate(potionButtonGO, transform) as GameObject;
-        Button newPotionButton = newPotionButtonGO.transform.Find("Button").GetComponent<Button>();
+        GameObject newPotionButtonGO = Instantiate(potionButtonGO) as GameObject;
+        newPotionButtonGO.transform.localScale = new Vector3 ( 0.033f , 0.033f , 0.033f );
+        newPotionButtonGO.transform.rotation = Quaternion.Euler ( 0 , -90f , 0 );
 
-        Image newPotionButtonImage = newPotionButton.transform.Find("Button").GetComponent<Image> ( );
+        Image newPotionButtonImage = newPotionButtonGO.transform.Find("Weapon Image").GetComponent<Image> ( );
         newPotionButtonImage.sprite = potionsSprite;
 
-        Text newPotionText = newPotionButton.transform.Find("Name Text").GetComponent<Text>();
+        Text newPotionText = newPotionButtonGO.transform.Find("Name Text").GetComponent<Text>();
         newPotionText.text = potionsName;
 
-        
         Text quantityText = newPotionButtonGO.transform.Find ( "Quantity Text" ).GetComponent<Text> ( );
-        quantityText.text = quantity.ToString();
+        quantityText.text = quantity.ToString ( );
 
-      
+        GameObject scrollBarContent = transform.parent.Find("Scroll View").transform.Find("Viewport").transform.Find("Content").gameObject;
+        newPotionButtonGO.transform.parent = scrollBarContent.transform;
     }
+
     //private void SaveNewpotions(Sprite potionsSprite, Sprite typeSprite, string potionsName)
     //{
     //    weaponList.name = potionsName;
@@ -108,7 +109,6 @@ public class PotionsPanel : MonoBehaviour
     //            }
     //        }
     //    }
-
 
     //}
 }
