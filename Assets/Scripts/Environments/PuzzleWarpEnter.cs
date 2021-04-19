@@ -5,41 +5,61 @@ using UnityEngine.SceneManagement;
 
 public class PuzzleWarpEnter : MonoBehaviour
 {
+    private string nameOfScene;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start ( )
     {
-        
+        nameOfScene = "Main Hall";
     }
 
-    void OnParticleCollision(GameObject other)
+    private void OnParticleCollision ( GameObject other )
     {
-        if (other.CompareTag("Player"))
+        if ( other.CompareTag ( "Player" ) )
         {
-            int randomSceneNum = 0;
+            int randomSceneNum = SceneTeleport(nameOfScene);
 
-            switch(randomSceneNum)
+            switch ( randomSceneNum )
             {
                 case 0:
                     {
-                        SceneManager.LoadScene ( 10  );
+                        SceneManager.LoadScene ( 0 );
                         break;
                     }
                 case 1:
                     {
-                        SceneManager.LoadScene ( 11 );
+                        SceneManager.LoadScene ( 1 );
                         break;
                     }
                 case 2:
                     {
-                        SceneManager.LoadScene ( 12 );
+                        SceneManager.LoadScene ( 2 );
                         break;
                     }
-               
-            }
+                case 3:
+                    {
+                        SceneManager.LoadScene ( 3 );
+                        break;
+                    }
+                case 4:
+                    {
+                        SceneManager.LoadScene ( 4 );
+                        break;
+                    }
 
+            }
 
         }
 
+    }
+
+    public void SetSceneName ( string sceneName )
+    {
+        nameOfScene = sceneName;
+    }
+
+    private int SceneTeleport ( string scene )
+    {
+        return SceneManager.GetSceneByName ( scene ).buildIndex;
     }
 }
