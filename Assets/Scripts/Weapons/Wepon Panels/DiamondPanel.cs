@@ -5,113 +5,107 @@ using UnityEngine.UI;
 
 public class DiamondPanel : MonoBehaviour
 {
-    Animator axeAnim;
-    GameObject potionsSlotGO;
-    private Image potionsIcon;
-    Sprite diamondSprite;
-    private Image typeImage;
-    Sprite typeSprite;
-    Text diamondName;
-    //private GameObject potionsSlot;
-    //Transform _slots;
-    //string jsonPath;
-    //Inventory weaponList;
-    //string iconPath;
-    //FileStream fStream;
-    //FileStream jsonStream;
-    //string typePath;
-    //List<string> weapons;
-    //JsonWriter jWriter;
-    //JsonReader jReader;
     public GameObject diamondButtonGO;
     public Sprite orangeDiamondSprite;
- 
+    private int quantity;
 
     // Start is called before the first frame update
-    void Start ( )
+    private void Start ( )
     {
-        axeAnim = GetComponent<Animator> ( );
-        AddNewDiamond ( orangeDiamondSprite , 1 , "Orange Diamond" );
+        quantity = 0;
 
     }
 
-    public void OpenAxePanel ( )
+    public int DiamondCounter ( )
     {
-        axeAnim.SetBool ( "isOpen" , true );
-    }
-
-    public void CloseAxePanel ( )
-    {
-        axeAnim.SetBool ( "isOpen" , false );
+        return quantity += 1;
     }
 
     public void AddNewDiamond ( Sprite diamondSprite , int quantity , string diamondName )
     {
-        GameObject newDiamondButtonGO = Instantiate(diamondButtonGO, transform) as GameObject;
-        Button newDiamondButton = newDiamondButtonGO.transform.Find("Button").GetComponent<Button>();
-        
-        Image newDiamondButtonImage = newDiamondButtonGO.transform.Find("Button").GetComponent<Image> ( );
+        gameObject.SetActive ( true );
+        GameObject newDiamondButtonGO = Instantiate(diamondButtonGO) as GameObject;
+        newDiamondButtonGO.transform.position = Vector3.zero;
+        newDiamondButtonGO.transform.localScale = new Vector3 ( 0.033f , 0.033f , 0.033f );
+        newDiamondButtonGO.transform.rotation = Quaternion.Euler ( 0 , 0 , 0 );
+        newDiamondButtonGO.name = diamondName;
+
+        Image newDiamondButtonImage = newDiamondButtonGO.transform.Find("Weapon Image").GetComponent<Image> ( );
         newDiamondButtonImage.sprite = diamondSprite;
 
         Text newDiamondText = newDiamondButtonGO.transform.Find("Name Text").GetComponent<Text>();
         newDiamondText.text = diamondName;
 
-       Text quantityText = newDiamondButtonGO.transform.Find ( "Quantity Text" ).GetComponent<Text> ( );
-        quantityText.text = quantity.ToString();
+        Text quantityText = newDiamondButtonGO.transform.Find ( "Quantity Text" ).GetComponent<Text> ( );
+        quantityText.text = quantity.ToString ( );
 
-       
+        GameObject scrollBarContent = transform.parent.Find("Scroll View").transform.Find("Viewport").transform.Find("Content").gameObject;
+        Button newDiamondButton = newDiamondButtonGO.GetComponent<Button>();
+        newDiamondButton.transform.parent = scrollBarContent.transform;
+
     }
 
-    public void PrintMe()
+    public void UpdateDiamondButton ( GameObject diamondButton , int quantityToAdd )
     {
-        Debug.Log ( "I have been clicked!!!" );
+        switch ( diamondButton.name )
+        {
+            case "Red Diamond":
+                {
+                    Text redDiamondQuantityString = diamondButton.transform.Find("Quantity Text").GetComponent<Text>();
+                    int redDiamondCurrentQuantity = int.Parse(redDiamondQuantityString.text);
+                    int redDiamondUpdatedQuantity = redDiamondCurrentQuantity + quantityToAdd;
+                    redDiamondQuantityString.text = redDiamondUpdatedQuantity.ToString ( );
+                    break;
+                }
+            case "Blue Diamond":
+                {
+                    Text blueDiamondQuantityString = diamondButton.transform.Find("Quantity Text").GetComponent<Text>();
+                    int blueDiamondCurrentQuantity = int.Parse(blueDiamondQuantityString.text);
+                    int blueDiamondUpdatedQuantity = blueDiamondCurrentQuantity + quantityToAdd;
+                    blueDiamondQuantityString.text = blueDiamondUpdatedQuantity.ToString ( );
+                    break;
+                }
+            case "Green Diamond":
+                {
+                    Text greenDiamondQuantityString = diamondButton.transform.Find("Quantity Text").GetComponent<Text>();
+                    int greenDiamondCurrentQuantity = int.Parse(greenDiamondQuantityString.text);
+                    int greenDiamondUpdatedQuantity = greenDiamondCurrentQuantity + quantityToAdd;
+                    greenDiamondQuantityString.text = greenDiamondUpdatedQuantity.ToString ( );
+                    break;
+                }
+            case "Purple Diamond":
+                {
+                    Text purpleDiamondQuantityString = diamondButton.transform.Find("Quantity Text").GetComponent<Text>();
+                    int purpleDiamondCurrentQuantity = int.Parse(purpleDiamondQuantityString.text);
+                    int purpleDiamondUpdatedQuantity = purpleDiamondCurrentQuantity + quantityToAdd;
+                    purpleDiamondQuantityString.text = purpleDiamondUpdatedQuantity.ToString ( );
+                    break;
+                }
+            case "Yellow Diamond":
+                {
+                    Text yellowDiamondQuantityString = diamondButton.transform.Find("Quantity Text").GetComponent<Text>();
+                    int yellowDiamondCurrentQuantity = int.Parse(yellowDiamondQuantityString.text);
+                    int yellowDiamondUpdatedQuantity = yellowDiamondCurrentQuantity + quantityToAdd;
+                    yellowDiamondQuantityString.text = yellowDiamondUpdatedQuantity.ToString ( );
+                    break;
+                }
+            case "Orange Diamond":
+                {
+                    Text orangeDiamondQuantityString = diamondButton.transform.Find("Quantity Text").GetComponent<Text>();
+                    int orangeDiamondCurrentQuantity = int.Parse(orangeDiamondQuantityString.text);
+                    int orangeDiamondUpdatedQuantity = orangeDiamondCurrentQuantity + quantityToAdd;
+                    orangeDiamondQuantityString.text = orangeDiamondUpdatedQuantity.ToString ( );
+                    break;
+                }
+            case "Silver Diamond":
+                {
+                    Text silverDiamondQuantityString = diamondButton.transform.Find("Quantity Text").GetComponent<Text>();
+                    int silverDiamondCurrentQuantity = int.Parse(silverDiamondQuantityString.text);
+                    int silverDiamondUpdatedQuantity = silverDiamondCurrentQuantity + quantityToAdd;
+                    silverDiamondQuantityString.text = silverDiamondUpdatedQuantity.ToString ( );
+                    break;
+                }
+        }
     }
-    //private void SaveNewpotions ( Sprite diamondSprite , Sprite typeSprite , string diamondName )
-    //{
-    //    weaponList.name = diamondName;
-    //    weapons.Add ( weaponList.name );
-    //    weaponList.description = "";
-    //    weapons.Add ( weaponList.description );
-    //    weaponList.price = "";
-    //    weapons.Add ( weaponList.price );
-    //    weaponList.icon = iconPath + "//" + diamondSprite.name;
-    //    weapons.Add ( weaponList.icon );
-    //    weaponList.type = typePath + "//" + typeSprite.name;
-    //    weapons.Add ( weaponList.type );
 
-    //    string weapon_potions = JsonConvert.SerializeObject(weapons, Formatting.Indented);
-
-    //    using ( var streamReader = new StreamReader ( jsonStream ) )
-    //    {
-    //        jReader = new JsonTextReader ( streamReader );
-
-    //        while ( jReader.Read ( ) )
-    //        {
-    //            if ( jReader.ReadAsString ( ) != "potionss" )
-    //            {
-    //                jReader.Skip ( );
-    //            }
-
-    //            else
-    //            {
-    //                jWriter.Formatting = Formatting.Indented;
-
-    //                jWriter.WriteStartObject ( );
-    //                jWriter.WritePropertyName ( "name" );
-    //                jWriter.WriteValue ( weapons [ 0 ] );
-    //                jWriter.WritePropertyName ( "description" );
-    //                jWriter.WriteValue ( weapons [ 1 ] );
-    //                jWriter.WritePropertyName ( "price" );
-    //                jWriter.WriteValue ( weapons [ 2 ] );
-    //                jWriter.WritePropertyName ( "icon" );
-    //                jWriter.WriteValue ( weapons [ 3 ] );
-    //                jWriter.WritePropertyName ( "type" );
-    //                jWriter.WriteValue ( weapons [ 4 ] );
-    //                jWriter.WriteEndObject ( );
-    //            }
-    //        }
-    //    }
-
-
-    //}
 }

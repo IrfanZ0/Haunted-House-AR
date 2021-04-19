@@ -7,61 +7,63 @@ using UnityEngine.UI;
 
 public class AxePanel : MonoBehaviour
 {
-    Animator axeAnim;
-    GameObject axeSlotGO;
+    private Animator axeAnim;
+    private GameObject axeSlotGO;
     private Image axeIcon;
-    Sprite axeSprite;
+    private Sprite axeSprite;
     private Image typeImage;
-    Sprite typeSprite;
-    Text axeName;
-    //private GameObject axeSlot;
-    //Transform _slots;
-    //string jsonPath;
-    //Inventory weaponList;
-    //string iconPath;
-    //FileStream fStream;
-    //FileStream jsonStream;
-    //string typePath;
-    //List<string> weapons;
-    //JsonWriter jWriter;
-    //JsonReader jReader;
+    private Sprite typeSprite;
+    private Text axeName;
     public GameObject axeButtonGO;
-   
+    public Sprite regularAxeSprite;
+    public Sprite medievalAxeSprite;
+    public Sprite fireManAxeSprite;
+    public Sprite doubleHammerAxeSprite;
+    public Sprite doubleBladeAxeSprite;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start ( )
     {
-        axeAnim = GetComponent<Animator>();
-        
+        axeAnim = GetComponent<Animator> ( );
+        AddNewAxeButton ( regularAxeSprite , 1 , "Regular Axe" );
+        AddNewAxeButton ( medievalAxeSprite , 1 , "Medieval Axe" );
+        AddNewAxeButton ( fireManAxeSprite , 1 , "FireMan Axe" );
+        AddNewAxeButton ( doubleHammerAxeSprite , 1 , "Double Hammer Axe" );
+        AddNewAxeButton ( doubleBladeAxeSprite , 1 , "Double Blade Axe" );
+
     }
 
-    public void OpenAxePanel()
+    public void OpenAxePanel ( )
     {
-        axeAnim.SetBool("isOpen", true);
+        axeAnim.SetBool ( "isOpen" , true );
     }
 
-    public void CloseAxePanel()
+    public void CloseAxePanel ( )
     {
-        axeAnim.SetBool("isOpen", false);
+        axeAnim.SetBool ( "isOpen" , false );
     }
 
-    public void AddNewAxe(Sprite axeSprite, int quantity, string axeName)
+    public void AddNewAxeButton ( Sprite axeSprite , int quantity , string axeName )
     {
-        GameObject newAxeButtonGO = Instantiate(axeButtonGO, transform) as GameObject;
-        Button newAxeButton = newAxeButtonGO.transform.Find("Button").GetComponent<Button>();
+        GameObject newAxeButtonGO = Instantiate(axeButtonGO) as GameObject;
+        newAxeButtonGO.transform.localScale = new Vector3 ( 0.033f , 0.033f , 0.033f );
+        newAxeButtonGO.transform.rotation = Quaternion.Euler ( 0 , -90f , 0 );
 
-        Image newAxeButtonImage = newAxeButtonGO.transform.Find("Button").GetComponent<Image> ( );
+        Image newAxeButtonImage = newAxeButtonGO.transform.Find("Weapon Image").GetComponent<Image> ( );
         newAxeButtonImage.sprite = axeSprite;
 
         Text newAxeText = newAxeButtonGO.transform.Find("Name Text").GetComponent<Text>();
         newAxeText.text = axeName;
 
         Text quantityText = newAxeButtonGO.transform.Find ( "Quantity Text" ).GetComponent<Text> ( );
-        quantityText.text = quantity.ToString();
+        quantityText.text = quantity.ToString ( );
 
-        
-       
+        GameObject scrollBarContent = transform.parent.Find("Scroll View").transform.Find("Viewport").transform.Find("Content").gameObject;
+        newAxeButtonGO.transform.parent = scrollBarContent.transform;
+        newAxeButtonGO.transform.localPosition = Vector3.zero;
+
     }
+
     //private void SaveNewaxe(Sprite axeSprite, Sprite typeSprite, stringaxeName)
     //{
     //    weaponList.name =axeName;
@@ -107,7 +109,6 @@ public class AxePanel : MonoBehaviour
     //            }
     //        }
     //    }
-
 
     //}
 }
