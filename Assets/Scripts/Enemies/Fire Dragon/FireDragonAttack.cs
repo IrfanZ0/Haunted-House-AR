@@ -5,56 +5,63 @@ using UnityEngine.AI;
 
 public class FireDragonAttack : MonoBehaviour
 {
-    Animator fDragonAnim;
-    NavMeshAgent fDragonNavMesh;
-    float distance;
-    GameObject player;
+    private Animator fDragonAnim;
+    public GameObject fireFlameGO;
+    private GameObject fireFlame;
+    private Transform fireSpot;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
+        fDragonAnim = GetComponent<Animator> ( );
+        fireSpot = transform.Find ( "Fire Spot" );
 
-        fDragonAnim = GetComponent<Animator>();
-        fDragonNavMesh = GetComponent<NavMeshAgent>();
-        player = GameObject.FindGameObjectWithTag("Player");
     }
 
-    public void Attack()
+    private void Update ( )
     {
-        fDragonNavMesh.velocity = Vector3.zero;
-        fDragonAnim.SetBool("isFlying", true);
-        distance = Vector3.Distance(fDragonNavMesh.gameObject.transform.position, player.transform.position);
-
-        if (distance >= 1f)
+        if ( fDragonAnim.GetCurrentAnimatorStateInfo ( 0 ).IsName ( "fly breath fire" ) )
         {
-            BreathFire();
-        }
+            if ( fireFlame == null )
+            {
+                fireFlame = Instantiate ( fireFlameGO ) as GameObject;
+                fireFlame.transform.parent = fireSpot;
+                fireFlame.transform.localPosition = Vector3.zero;
 
-        else if (distance > 0.5f && distance < 1)
-        {
-            FlyAttack();
-        }
+            }
 
-        else
-        {
-            FlyHit();
+            if ( fireFlame.CompareTag ( "Fire Blast" ) )
+            {
+                BreathFire ( fireFlame );
+            }
         }
 
     }
 
-    private void BreathFire()
+    private void BreathFire ( GameObject fireFlame )
     {
-        fDragonAnim.SetTrigger("breath Fire");
+        ParticleSystem psFireFlame = fireFlame.GetComponent<ParticleSystem> ( );
+        ParticleSystem psFireBlast = fireFlame.transform.Find("SubBlast01_fire").GetComponent<ParticleSystem>();
+
+        if ( !psFireFlame.isPlaying )
+        {
+            psFireFlame.Play ( );
+        }
+
+        if ( !psFireBlast.isPlaying )
+        {
+            psFireBlast.Play ( );
+        }
     }
 
-    private void FlyHit()
+    private void FlyHit ( )
     {
-        fDragonAnim.SetTrigger("hit");
+        fDragonAnim.SetTrigger ( "hit" );
 
     }
 
-    private void FlyAttack()
+    private void FlyAttack ( )
     {
-        fDragonAnim.SetTrigger("attack");
+        fDragonAnim.SetTrigger ( "attack" );
     }
 }

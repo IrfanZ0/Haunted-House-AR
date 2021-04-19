@@ -5,51 +5,54 @@ using UnityEngine.UI;
 
 public class FireBubaHealth : MonoBehaviour
 {
-    Slider lifeSlider;
-    Animator fBubaAnim;
+    private Slider lifeSlider;
+    private Animator fireBubaAnim;
+    private Image fill;
+    private float current_health;
+    private float total_health = 30f;
+    public GameObject[] prizesList;
+    private int prizeNum;
+    private GameObject selectedPrize;
+    public GameObject blueDiamond;
+    public GameObject orangeDiamond;
+    public GameObject redDiamond;
+    public GameObject silverDiamond;
+    public GameObject violetDiamond;
+    public GameObject yellowDiamond;
+    public GameObject coinBag;
+    public GameObject treasureChest;
 
     // Use this for initialization
-    void Start()
+    private void Start ( )
     {
-        lifeSlider = gameObject.GetComponentInChildren<Slider>();
-        fBubaAnim = gameObject.GetComponent<Animator>();
-
+        lifeSlider = GetComponent<Slider> ( );
+        fireBubaAnim = GetComponentInParent<Animator> ( );
+        current_health = total_health;
 
     }
-    void OnCollisionEnter(Collision coll)
+
+    public void Damage ( float damage )
     {
-        if (coll.collider.CompareTag("Bullets"))
-        {
-            Damage(1f);
+        current_health -= damage;
 
-        }
-
-        if (coll.collider.CompareTag("Magic Sword"))
-        {
-            Damage(1f);
-
-        }
-
-        if (coll.collider.CompareTag("Lightning Bolt"))
-        {
-            Damage(3f);
-
-        }
     }
 
-    public void Damage(float damage)
+    private void FireBubaDeath ( )
     {
-        lifeSlider.value -= 3f;
-        fBubaAnim.SetTrigger("Damage");
+        fireBubaAnim.SetBool ( "isDead" , true );
+        float deathTime = fireBubaAnim.GetCurrentAnimatorStateInfo ( 0 ).length;
+        Destroy ( gameObject , deathTime + 3f );
+    }
 
-        if (lifeSlider.value < 1f)
+    private void Update ( )
+    {
+        lifeSlider.value = current_health;
+
+        if ( lifeSlider.value <= 0 )
         {
-            fBubaAnim.SetBool("isDead", true);
-            Destroy(gameObject, 2f);
-        }
+            FireBubaDeath ( );
 
+        }
     }
 
 }
-
-
