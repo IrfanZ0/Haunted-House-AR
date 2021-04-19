@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
-[CreateAssetMenu(menuName= "PluggableAI/Decisions/Attack")]
+[CreateAssetMenu ( menuName = "PluggableAI/Decisions/Attack" )]
 public class AttackStateDecision : Decision
 {
     public override bool Decide ( StateController controller )
@@ -14,27 +15,22 @@ public class AttackStateDecision : Decision
 
     private bool AttackDecision ( StateController controller )
     {
-        
-        float distanceToPlayer = Vector3.Distance(controller.navMeshAgent.transform.position, controller.chaseTarget.position);
-       
+        bool attack = false;
+        NavMeshHit hit;
 
-        if ( distanceToPlayer < 1.0f)
+        //if ( controller.navMeshAgent.remainingDistance < controller.navMeshAgent.stoppingDistance && !controller.navMeshAgent.pathPending )
+        // {
+        if ( controller.navMeshAgent.Raycast ( controller.chaseTarget.position , out hit ) )
         {
-           
-            return true;
+            if ( hit.distance < 1.0f )
+            {
+                attack = true;
+            }
         }
+        // }
 
-        else
-        {
-            return false;
-        }
+        return attack;
+
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    
 }

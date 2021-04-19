@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[CreateAssetMenu ( menuName = "PluggableAI/Actions/Attack" )]
-public class AttackAction : Action
+[CreateAssetMenu ( menuName = "PluggableAI/Actions/Attack2" )]
+public class AttackAction2 : Action
 {
     public override void Act ( StateController controller )
     {
-        Attack ( controller );
+        Attack2 ( controller );
     }
 
-    private void Attack ( StateController controller )
+    private void Attack2 ( StateController controller )
     {
         RaycastHit hit;
 
@@ -32,12 +32,14 @@ public class AttackAction : Action
                         {
                             float lancerHealth = controller.navMeshAgent.gameObject.transform.Find("Canvas").transform.Find("Health Bar").GetComponent<Slider>().value;
 
-                            if ( distanceToPlayer < 0.3f && lancerHealth >= 60f && lancerHealth < 90f )
+                            if ( distanceToPlayer >= 0.3f && distanceToPlayer < 0.6f && lancerHealth >= 30f && lancerHealth < 60f )
                             {
                                 controller.navMeshAgent.isStopped = true;
                                 controller.animator.SetFloat ( "Speed_Lancer" , 0 );
                                 controller.animator.SetFloat ( "Power_Lancer" , lancerHealth );
-                                controller.animator.SetTrigger ( "Attack1_Lancer" );
+                                controller.navMeshAgent.gameObject.transform.Find ( "magic_ring_green" ).GetComponent<ParticleSystem> ( ).Play ( true );
+                                controller.animator.SetTrigger ( "Attack2_Lancer" );
+                                controller.navMeshAgent.gameObject.transform.Find ( "Green Bullets 9" ).GetComponent<ParticleSystem> ( ).Play ( true );
                             }
 
                             break;
@@ -48,15 +50,15 @@ public class AttackAction : Action
                             float totalHealth = controller.navMeshAgent.gameObject.transform.Find("Canvas").transform.Find("Health Bar").GetComponent<Slider>().maxValue;
                             float power = currentHealth / totalHealth;
 
-                            if ( power > 0 && power < 0.3f )
+                            if ( power >= 0.3f && power < 0.6f )
                             {
                                 controller.navMeshAgent.isStopped = true;
-                                controller.animator.SetFloat ( "Power_Ghost" , 0.1f );
-                                controller.animator.SetTrigger ( "Attack1_Ghost" );
-                                ParticleSystem psVoid = controller.navMeshAgent.gameObject.transform.Find ( "Proj01_void" ).GetComponent<ParticleSystem> ( );
-                                if ( !psVoid.isPlaying )
+                                controller.animator.SetFloat ( "Power_Ghost" , 0.5f );
+                                controller.animator.SetTrigger ( "Attack2_Ghost" );
+                                ParticleSystem psSonic = controller.navMeshAgent.gameObject.transform.Find ( "Proj01_sonic" ).GetComponent<ParticleSystem> ( );
+                                if ( !psSonic.isPlaying )
                                 {
-                                    psVoid.Play ( );
+                                    psSonic.Play ( );
                                 }
                             }
 
@@ -64,26 +66,24 @@ public class AttackAction : Action
                         }
                     case "Dragon":
                         {
-
                             if ( controller.navMeshAgent.gameObject.name == "Baby Ice Dragon" )
                             {
-                                if ( distanceToPlayer < 0.5f )
+                                if ( distanceToPlayer >= 0.5f )
                                 {
                                     controller.animator.SetBool ( "Flying" , true );
-                                    controller.animator.SetTrigger ( "head butt" );
+                                    controller.animator.SetTrigger ( "breath ice" );
                                 }
 
                             }
                             if ( controller.navMeshAgent.gameObject.name == "Baby Fire Dragon" )
                             {
-                                if ( distanceToPlayer < 0.5f )
+                                if ( distanceToPlayer >= 0.5f )
                                 {
                                     controller.animator.SetBool ( "isFlying" , true );
-                                    controller.animator.SetTrigger ( "attack" );
+                                    controller.animator.SetTrigger ( "breath Fire" );
                                 }
 
                             }
-
                             break;
                         }
                     case "Demon":
@@ -92,42 +92,32 @@ public class AttackAction : Action
                             float totalHealth = controller.navMeshAgent.gameObject.transform.Find("Canvas").transform.Find("Health Bar").GetComponent<Slider>().maxValue;
                             float power = currentHealth / totalHealth;
 
-                            if ( power > 0 && power < 0.25f && distanceToPlayer <= 0.25f )
+                            if ( power >= 0.25f && power < 0.5f && distanceToPlayer > 0.25f && distanceToPlayer <= 0.5f )
                             {
                                 controller.navMeshAgent.isStopped = true;
-                                controller.animator.SetTrigger ( "Attack1_Demon_Lord" );
-                                controller.animator.SetFloat ( "Power_Demon_Lord" , 0.1f );
+                                controller.animator.SetTrigger ( "Attack2_Demon_Lord" );
+                                controller.animator.SetFloat ( "Power_Demon_Lord" , 0.3f );
                             }
-
-                            break;
-                        }
-
-                    case "Skeleton":
-                        {
-                            controller.navMeshAgent.isStopped = true;
-                            controller.animator.SetBool ( "isWalking_Skeleton" , false );
-                            controller.animator.SetFloat ( "Speed_Skeleton" , 0 );
-                            controller.animator.SetTrigger ( "Attack_Skeleton" );
 
                             break;
                         }
 
                     case "Bat":
                         {
-                            if ( distanceToPlayer < 0.5f )
+                            if ( distanceToPlayer >= 0.5f && distanceToPlayer <= 1.0f )
                             {
                                 controller.navMeshAgent.isStopped = true;
                                 controller.animator.SetBool ( "Bat Fly" , false );
-                                controller.animator.SetTrigger ( "Bat Attack 1" );
+                                controller.animator.SetTrigger ( "Bat Attack 2" );
                             }
                             break;
 
                         }
+
                 }
-
             }
-        }
 
+        }
     }
 
 }

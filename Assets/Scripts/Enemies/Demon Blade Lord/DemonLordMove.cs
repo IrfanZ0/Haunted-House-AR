@@ -5,22 +5,37 @@ using UnityEngine.AI;
 
 public class DemonLordMove : MonoBehaviour
 {
-    NavMeshAgent dlNavMeshAgent;
+    private NavMeshAgent dlNavMeshAgent;
     private bool navMeshActive = false;
-    public List<Transform> wayPoints;
-    StateController dlStateController;
+    private List<Transform> wayPoints;
+    private Transform demonLordPoint1;
+    private Transform demonLordPoint2;
+    private Transform demonLordPoint3;
+    private Transform demonLordPoint4;
+    private Transform demonLordPoint5;
+    private StateController dlStateController;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start ( )
     {
-        dlStateController = GetComponent<StateController>();
-        wayPoints = new List<Transform>();
-        dlNavMeshAgent = GetComponent<NavMeshAgent>();
+        dlStateController = GetComponent<StateController> ( );
+        wayPoints = new List<Transform> ( );
+        demonLordPoint1 = GameObject.Find ( "Demon Lord Path" ).transform.Find ( "Demon Lord WayPoint 1" );
+        wayPoints.Add ( demonLordPoint1 );
+        demonLordPoint2 = GameObject.Find ( "Demon Lord Path" ).transform.Find ( "Demon Lord WayPoint 2" );
+        wayPoints.Add ( demonLordPoint2 );
+        demonLordPoint3 = GameObject.Find ( "Demon Lord Path" ).transform.Find ( "Demon Lord WayPoint 3" );
+        wayPoints.Add ( demonLordPoint3 );
+        demonLordPoint4 = GameObject.Find ( "Demon Lord Path" ).transform.Find ( "Demon Lord WayPoint 4" );
+        wayPoints.Add ( demonLordPoint4 );
+        demonLordPoint5 = GameObject.Find ( "Demon Lord Path" ).transform.Find ( "Demon Lord WayPoint 5" );
+        wayPoints.Add ( demonLordPoint5 );
+        dlNavMeshAgent = GetComponent<NavMeshAgent> ( );
 
-        if (dlNavMeshAgent.gameObject != null && dlNavMeshAgent.isOnNavMesh)
+        if ( dlNavMeshAgent.gameObject != null && dlNavMeshAgent.isOnNavMesh )
         {
             navMeshActive = true;
-            dlStateController.SetupAI(navMeshActive, wayPoints);
+            dlStateController.SetupAI ( navMeshActive , wayPoints );
 
         }
 
