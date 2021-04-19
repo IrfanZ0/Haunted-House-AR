@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8e45c3171d089ab41af74ed34c3cdf98, type: 3}
-  m_Name: AttackState
+  m_Name: Attack State 4
   m_EditorClassIdentifier: 
   actions:
-  - {fileID: 11400000, guid: 4ed8c2b35c7300049a5895535dc6000a, type: 2}
-  sceneGizmoColor: {r: 0.8725747, g: 0.8784314, b: 0.0862745, a: 1}
+  - {fileID: 11400000, guid: f9629ba054491df49b5476042a1ed7eb, type: 2}
+  sceneGizmoColor: {r: 0.8773585, g: 0.120016046, b: 0.7603704, a: 1}
   transitions:
   - decision: {fileID: 11400000, guid: 7c611df9cee192f48b33e9f2db060bab, type: 2}
-    trueState: {fileID: 11400000, guid: 04dadf76c62c21a4eb39277db5aa0ec3, type: 2}
+    trueState: {fileID: 11400000}
     falseState: {fileID: 11400000, guid: 9df504d1b9c5240448d7287b706db63d, type: 2}

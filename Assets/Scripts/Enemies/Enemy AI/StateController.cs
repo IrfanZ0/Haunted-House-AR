@@ -12,25 +12,28 @@ public class StateController : MonoBehaviour
     [HideInInspector] public NavMeshAgent navMeshAgent;
     [HideInInspector] public Animator animator;
     [HideInInspector] public List<Transform> wayPointList;
+    [HideInInspector] public List<Transform> wayPointList2;
     [HideInInspector] public int nextWayPoint;
     [HideInInspector] public Transform chaseTarget;
     [HideInInspector] public float stateTimeElapsed;
+    [HideInInspector] public LancerAttack lancerAttack;
 
     private bool aiActive;
 
-
-    void Awake()
+    private void Awake ( )
     {
-        
-        navMeshAgent = GetComponent<NavMeshAgent>();
+        lancerAttack = GetComponent<LancerAttack> ( );
+        navMeshAgent = GetComponent<NavMeshAgent> ( );
         animator = GetComponent<Animator> ( );
     }
 
-    public void SetupAI(bool aiActivationFromEnemyManager, List<Transform> wayPointsFromEnemyManager)
+    public void SetupAI ( bool aiActivationFromEnemyManager , List<Transform> wayPointsFromEnemyManager )
     {
         wayPointList = wayPointsFromEnemyManager;
+        wayPointList2 = wayPointsFromEnemyManager;
+
         aiActive = aiActivationFromEnemyManager;
-        if (aiActive)
+        if ( aiActive )
         {
             navMeshAgent.enabled = true;
         }
@@ -40,39 +43,39 @@ public class StateController : MonoBehaviour
         }
     }
 
-    void Update()
+    private void Update ( )
     {
-        if (!aiActive)
+        if ( !aiActive )
             return;
 
-        currentState.UpdateState(this);
+        currentState.UpdateState ( this );
     }
 
-    void OnDrawGizmos()
+    private void OnDrawGizmos ( )
     {
-        if (currentState != null && eyes != null)
+        if ( currentState != null && eyes != null )
         {
             Gizmos.color = currentState.sceneGizmoColor;
-            Gizmos.DrawWireSphere(eyes.position, enemyStats.lookSphereCastRadius);
+            Gizmos.DrawWireSphere ( eyes.position , enemyStats.lookSphereCastRadius );
         }
     }
 
-    public void TransitionToState(State nextState)
+    public void TransitionToState ( State nextState )
     {
-        if (nextState != remainState)
+        if ( nextState != remainState )
         {
             currentState = nextState;
-            OnExitState();
+            OnExitState ( );
         }
     }
 
-    public bool CheckIfCountDownElapsed(float duration)
+    public bool CheckIfCountDownElapsed ( float duration )
     {
         stateTimeElapsed += Time.deltaTime;
-        return (stateTimeElapsed >= duration);
+        return ( stateTimeElapsed >= duration );
     }
 
-    private void OnExitState()
+    private void OnExitState ( )
     {
         stateTimeElapsed = 0;
     }
