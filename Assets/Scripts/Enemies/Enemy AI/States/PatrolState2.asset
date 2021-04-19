@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8e45c3171d089ab41af74ed34c3cdf98, type: 3}
-  m_Name: PatrolState
+  m_Name: PatrolState2
   m_EditorClassIdentifier: 
   actions:
-  - {fileID: 11400000, guid: ed225fb77879fdb4ba812049405a725a, type: 2}
-  sceneGizmoColor: {r: 0.4227483, g: 0.9433962, b: 0.648247, a: 1}
+  - {fileID: 11400000, guid: 608795706e35c564ab9cd741a37fb6d6, type: 2}
+  sceneGizmoColor: {r: 0.8773585, g: 0.84005773, b: 0.22761661, a: 1}
   transitions:
   - decision: {fileID: 11400000, guid: 7c611df9cee192f48b33e9f2db060bab, type: 2}
     trueState: {fileID: 11400000, guid: aa2d995bd324d6643bed1bab67ca9506, type: 2}
