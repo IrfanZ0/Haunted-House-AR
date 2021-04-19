@@ -1,85 +1,80 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SkeletonHealth : MonoBehaviour {
+public class SkeletonHealth : MonoBehaviour
+{
 
-    Slider skeletonHealthBar;
-    float total_health = 75f;
-    float current_health;
-    Animator skeletonAnim;
-    public GameObject explosion;
-    AudioSource bulletExplosionSound;
-    ParticleSystem bulletPS;
-   
+    private Slider lifeSlider;
+    private float total_health = 50f;
+    private float current_health;
+    private Animator skeletonAnim;
+    public GameObject[] prizesList;
+    private int prizeNum;
+    private GameObject selectedPrize;
+    public GameObject blueDiamond;
+    public GameObject orangeDiamond;
+    public GameObject redDiamond;
+    public GameObject silverDiamond;
+    public GameObject violetDiamond;
+    public GameObject yellowDiamond;
+    public GameObject coinBag;
+    public GameObject treasureChest;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    private void Start ( )
+    {
         current_health = total_health;
-        skeletonHealthBar = transform.Find("Canvas").transform.Find("Health Bar").GetComponent<Slider>();
-        
-       
-        skeletonAnim = GetComponent<Animator>();
-        bulletPS = explosion.GetComponentInChildren<ParticleSystem>();
-        bulletExplosionSound = explosion.GetComponent<AudioSource>();
-      
+        lifeSlider = GetComponent<Slider> ( );
+        skeletonAnim = GetComponentInParent<Animator> ( );
+        prizesList = new GameObject [ ] { blueDiamond , orangeDiamond , redDiamond , silverDiamond , violetDiamond , yellowDiamond , coinBag , treasureChest };
+        prizeNum = Mathf.RoundToInt ( UnityEngine.Random.Range ( 0 , prizesList.Length ) );
+        selectedPrize = SkeletonPrize ( prizesList , prizeNum ) as GameObject;
+        selectedPrize.transform.parent = transform.root;
+        selectedPrize.SetActive ( false );
     }
 
-    void OnCollisionEnter(Collision coll)
-    {
-        if (coll.gameObject.CompareTag("Bullets"))
-        {
-            Damage(1f);
-            StartCoroutine(HideBullets ( coll.gameObject ));
-           
-
-        }
-
-        if (coll.collider.CompareTag("Magic Sword"))
-        {
-            Damage(1f);
-
-        }
-
-        if (coll.collider.CompareTag("Lightning Bolt"))
-        {
-            Damage(3f);
-
-        }
-    }
-
-    private void OnCollisionExit ( Collision collision )
-    {
-        if (collision.gameObject.CompareTag("Bullets"))
-        {
-            skeletonAnim.SetTrigger ( "Damage" );
-        }
-    }
-
-    public void Damage(float damage)
+    public void Damage ( float damage )
     {
         current_health -= damage;
-       
-        if (skeletonHealthBar.value < 1f)
-        {
-            skeletonAnim.SetBool("isDead", true);
-            Destroy(gameObject, 2f);
-        }
 
+        if ( current_health <= 0 )
+        {
+            SkeletonDeath ( );
+            selectedPrize.transform.parent = null;
+            selectedPrize.SetActive ( true );
+
+        }
     }
 
-    IEnumerator HideBullets(GameObject bullet)
+    private void SkeletonDeath ( )
     {
-        bullet.SetActive ( false );
-        yield return new WaitForSeconds ( 4f );
+        float skeletonDeathTime = skeletonAnim.GetCurrentAnimatorClipInfo ( 0) [0].clip.length;
+        Destroy ( transform.root.gameObject , skeletonDeathTime );
+        skeletonAnim.SetBool ( "isDead_Skeleton" , true );
     }
 
     private void Update ( )
     {
-       skeletonHealthBar.value = current_health;
-         
+        lifeSlider.value = current_health;
+
+    }
+
+    private GameObject SkeletonPrize ( GameObject [ ] prizes , int numPrize )
+    {
+        GameObject prizeTemp = null;
+
+        for ( int i = 0 ; i < prizes.Length ; i++ )
+        {
+            if ( i == numPrize )
+            {
+                prizeTemp = Instantiate ( prizes [ i ] , transform.position , Quaternion.identity ) as GameObject;
+            }
+
+        }
+
+        return prizeTemp;
     }
 
 }
