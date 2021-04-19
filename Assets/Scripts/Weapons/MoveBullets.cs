@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MoveBullets : MonoBehaviour {
+public class MoveBullets : MonoBehaviour
+{
 
-    Rigidbody rbBullet;
-    float thrust;
-	void Start()
+    private Rigidbody rbBullet;
+    private float thrust;
+
+    private void Start ( )
     {
-        rbBullet = GetComponent<Rigidbody>();
-        thrust = 2.5f;
+        rbBullet = GetComponent<Rigidbody> ( );
+        thrust = 75f;
 
     }
-	
-	
-	void FixedUpdate () {
 
-        rbBullet.AddForce(thrust * -1f * transform.forward);
+    private void FixedUpdate ( )
+    {
+        rbBullet.AddForce ( thrust * Vector3.forward );
 
-  	
-	}
+    }
 }
