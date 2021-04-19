@@ -10,7 +10,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AI;
 
-public class GraveyardController : MonoBehaviour
+public class OrangeDiamondGraveyardController : MonoBehaviour
 {
 
     public Camera firstPersonCamera;
@@ -20,38 +20,13 @@ public class GraveyardController : MonoBehaviour
     private List<ARRaycastHit> hitList;
     private LightEstimation lightEstimation;
     private GameObject player;
-
-    //public GameObject puzzlePortalGO;
-    //private GameObject puzzlePortal;
-    //public GameObject lightningBubaGO;
-    //private GameObject lightningBuba;
-    //public GameObject fireBubaGO;
-    //private GameObject fireBuba;
-    //public GameObject iceBubaGO;
-    //private GameObject iceBuba;
-    //public GameObject ghostGO;
-    //private GameObject ghost;
-    //public GameObject skeletonGO;
-    //private GameObject skeleton;
-    //public GameObject treasureBoxGO;
-    //private GameObject treasureBox;
-    //public GameObject batGO;
-    //private GameObject bat;
-    //public GameObject spiderGO;
-    //private GameObject spider;
     private List<GameObject> redBlocks;
-
     public GameObject hTree;
     private GameObject hauntedTree;
     private List<GameObject> blueBlocks;
     public GameObject tombStoneGO;
     private GameObject tombStone;
-    private GameObject mazeHolder;
-    private GameObject blueDiamondMazeHolder;
     private GameObject orangeDiamondMazeHolder;
-    private GameObject purpleDiamondMazeHolder;
-    private GameObject redDiamondMazeHolder;
-    private GameObject yellowDiamondMazeHolder;
     private RaycastHit hit;
     private GameObject playerCanvas;
     private Image playerLifeFillImage;
@@ -86,9 +61,9 @@ public class GraveyardController : MonoBehaviour
         hitList = new List<ARRaycastHit> ( );
         redBlocks = new List<GameObject> ( );
         blueBlocks = new List<GameObject> ( );
-        mazeHolder = GameObject.Find ( "Grave Yard" ).transform.Find ( "MazeHolder" ).gameObject;
+        orangeDiamondMazeHolder = GameObject.Find ( "Orange Diamond Maze" ).transform.Find ( "MazeHolder" ).gameObject;
 
-        foreach ( Transform child in mazeHolder.transform.GetComponentInChildren<Transform> ( ) )
+        foreach ( Transform child in orangeDiamondMazeHolder.transform.GetComponentInChildren<Transform> ( ) )
         {
 
             if ( child.CompareTag ( "Red Wall" ) )
@@ -104,51 +79,13 @@ public class GraveyardController : MonoBehaviour
 
         }
 
-        player.transform.parent = mazeHolder.transform;
-        startPosition = mazeHolder.transform.Find ( "Exit Portal" );
+        player.transform.parent = orangeDiamondMazeHolder.transform;
+        startPosition = orangeDiamondMazeHolder.transform.Find ( "Exit Portal" );
         player.transform.position = startPosition.position;
-
-        blueDiamondMazeHolder = GameObject.Find ( "Blue Diamond Maze" ).transform.Find ( "MazeHolder" ).gameObject;
-
-        if ( blueDiamondMazeHolder.activeSelf )
-        {
-            Transform blueStartPosition = blueDiamondMazeHolder.transform.Find("Exit Portal");
-            player.transform.position = blueStartPosition.position;
-
-        }
-
-        orangeDiamondMazeHolder = GameObject.Find ( "Orange Diamond Maze" ).transform.Find ( "MazeHolder" ).gameObject;
 
         if ( orangeDiamondMazeHolder.activeSelf )
         {
-            Transform orangeStartPosition = orangeDiamondMazeHolder.transform.Find("Exit Portal");
-            player.transform.position = orangeStartPosition.position;
-
-        }
-
-        purpleDiamondMazeHolder = GameObject.Find ( "Purple Diamond Maze" ).transform.Find ( "MazeHolder" ).gameObject;
-
-        if ( purpleDiamondMazeHolder.activeSelf )
-        {
-            Transform purpleStartPosition = purpleDiamondMazeHolder.transform.Find("Exit Portal");
-            player.transform.position = purpleStartPosition.position;
-
-        }
-
-        redDiamondMazeHolder = GameObject.Find ( "Red Diamond Maze" ).transform.Find ( "MazeHolder" ).gameObject;
-
-        if ( redDiamondMazeHolder.activeSelf )
-        {
-            Transform redStartPosition = redDiamondMazeHolder.transform.Find("Exit Portal");
-            player.transform.position = redStartPosition.position;
-
-        }
-
-        yellowDiamondMazeHolder = GameObject.Find ( "Yellow Diamond Maze" ).transform.Find ( "MazeHolder" ).gameObject;
-
-        if ( yellowDiamondMazeHolder.activeSelf )
-        {
-            Transform yellowStartPosition = yellowDiamondMazeHolder.transform.Find("Exit Portal");
+            Transform yellowStartPosition = orangeDiamondMazeHolder.transform.Find("Exit Portal");
             player.transform.position = yellowStartPosition.position;
 
         }

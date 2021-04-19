@@ -6,83 +6,116 @@ using UnityEngine.XR.ARSubsystems;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AI;
 
-
-
-
-public class MainHallController : MonoBehaviour, IDataSet {
+public class MainHallController : MonoBehaviour
+{
 
     public Camera firstPersonCamera;
-    private bool isQuitting = false;
-    GameObject canvas;
-    Slider loadingBar;
-    Dropdown sceneDD;
-    Text selectedText;
-    Slider healthBar;
-    Slider magicBar;
-    Text coinText;
-    Text diamondText;
-    GameObject player;
-    ARRaycastManager ARRaycastManager;
-    ARPlaneManager ARPlaneManager;
-    List<ARRaycastHit> hitList;
-    LightEstimation lightEstimation;
+    private GameObject player;
+    private ARRaycastManager arRaycastManager;
+    private ARPlaneManager ARPlaneManager;
+    private List<ARRaycastHit> hitList;
+    private List<ARRaycastHit> touchList;
+    private LightEstimation lightEstimation;
     public GameObject ghostGO;
-    GameObject ghost;
+    private GameObject ghost;
     public GameObject batGO;
-    GameObject bat;
+    private GameObject bat;
     public GameObject spiderGO;
-    GameObject spider;
+    private GameObject spider;
     public GameObject skeletonGO;
-    GameObject skeleton;
-    public GameObject landDroneGO;
-    GameObject landDrone;
+    private GameObject skeleton;
+    private GameObject redKnight;
     public GameObject lightningBubaGO;
-    GameObject lightningBuba;
+    private GameObject lightningBuba;
     public GameObject puzzlePortalGO;
-    GameObject puzzlePortal;
-    public GameObject robo1GO;
-    GameObject robo1;
+    private GameObject puzzlePortal;
+    private GameObject blueKnight;
+    public GameObject mainHallGO;
+    private GameObject mainHall;
     public GameObject treasureBoxGO;
-    GameObject treasureBox;
-
-
-   
+    private GameObject treasureBox;
+    private AudioSource hauntedMusic;
+    private RaycastHit hit;
+    private GameObject playerCanvas;
+    private Image playerLifeFillImage;
+    private Slider playerMagicSlider;
+    private Text coinText;
+    private Image characterImage;
+    private PlayerData pData;
+    private Transform startPosition;
+    private GameObject weaponSpot;
+    private Transform batStartTransform;
+    private Transform spiderStartTransform;
+    private Transform ghostStartTransform;
+    private Transform lightningBubaStartTransform;
+    private Transform skeletonStartTransform;
+    public  NavMeshSurface[] surfaces;
 
     // Use this for initialization
-    void Start () {
-        player = GameObject.FindGameObjectWithTag("Player");
-        canvas = player.transform.Find("Canvas").gameObject;
-        loadingBar = canvas.transform.Find("Level Panel").Find("Level Load Bar").GetComponent<Slider>();
-        sceneDD = canvas.transform.Find("Level Panel").transform.Find("Dropdown").GetComponent<Dropdown>();
-        selectedText = canvas.transform.Find("Level Panel").transform.Find("Dropdown").transform.Find("Label").GetComponent<Text>();
-        healthBar = player.transform.Find("Life Canvas").transform.Find("Life Panel").transform.Find("Health Bar").GetComponent<Slider>();
-        magicBar = player.transform.Find("Life Canvas").transform.Find("Life Panel").transform.Find("Magic Bar").GetComponent<Slider>();
-        coinText = player.transform.Find("Status Canvas").transform.Find("Status Panel").transform.Find("Coins Text").GetComponent<Text>();
-        diamondText = player.transform.Find("Status Canvas").transform.Find("Status Panel").transform.Find("Diamond Text").GetComponent<Text>();
-        ARRaycastManager = player.GetComponent<ARRaycastManager>();
-        ARPlaneManager = player.GetComponent<ARPlaneManager>();
-        lightEstimation = player.GetComponent<LightEstimation>();
+    private void Start ( )
+    {
+        for ( int i = 0 ; i < surfaces.Length ; i++ )
+        {
+            surfaces [ i ].BuildNavMesh ( );
+        }
 
-       
+        skeletonStartTransform = GameObject.Find ( "Skeleton Path" ).transform.Find ( "Skeleton WayPoint 1" );
+        lightningBubaStartTransform = GameObject.Find ( "Lightning Buba Path" ).transform.Find ( "Lightning Buba WayPoint 1" );
+        ghostStartTransform = GameObject.Find ( "Ghost WayPoints" ).transform.Find ( "Ghost Stop 1" );
+        spiderStartTransform = GameObject.Find ( "Spider Path 1" ).transform.Find ( "Spider WayPoint 1" );
+        batStartTransform = GameObject.Find ( "Bat Path 1" ).transform.Find ( "Bat WayPoint 1" );
+        playerCanvas = GameObject.FindGameObjectWithTag ( "Player Life" );
+        playerLifeFillImage = playerCanvas.transform.Find ( "Player Health Bar" ).transform.Find ( "Fill Area" ).transform.Find ( "Fill" ).GetComponent<Image> ( );
+        playerMagicSlider = playerCanvas.transform.Find ( "Magic Bar" ).GetComponent<Slider> ( );
+        coinText = playerCanvas.transform.Find ( "Coin Text" ).GetComponent<Text> ( );
+        characterImage = playerCanvas.transform.Find ( "Avatar Image" ).GetComponent<Image> ( );
+        pData = SaveLoadPlayerData.Load ( );
+        playerLifeFillImage.fillAmount = pData.lifeAmount;
+        playerMagicSlider.value = pData.magicAmount;
+        coinText.text = pData.money.ToString ( );
+        Addressables.LoadAssetAsync<Sprite> ( "Assets/SIMPLE Avatars Icons/64X64/" + pData.characterSpriteName + ".png" ).Completed += OnLoadFinished;
+
+        startPosition = GameObject.Find ( "Exit Portal" ).transform;
+        player = GameObject.FindGameObjectWithTag ( "Player" );
+        player.transform.position = startPosition.position;
+        weaponSpot = player.transform.Find ( "AR Camera" ).transform.Find ( "Weapon Spot" ).gameObject;
+        hauntedMusic = GetComponent<AudioSource> ( );
+        arRaycastManager = player.GetComponent<ARRaycastManager> ( );
+        ARPlaneManager = player.GetComponent<ARPlaneManager> ( );
+        lightEstimation = player.GetComponent<LightEstimation> ( );
+        hitList = new List<ARRaycastHit> ( );
+        touchList = new List<ARRaycastHit> ( );
+        ActivateWeapon ( pData.characterSpriteName );
+
     }
-	
-	// Update is called once per frame
-	void Update () {
 
-        float health = CurrentPlayer.current_health;
-        SetLifeLevel(health);
+    private void ActivateWeapon ( string avatarName )
+    {
+        switch ( avatarName )
+        {
+            case "Man_4":
+                {
+                    GameObject basicSword = weaponSpot.transform.Find("Basic Sword").gameObject;
+                    basicSword.SetActive ( true );
+                    break;
+                }
+            case "Girl":
+                {
+                    GameObject mauler = weaponSpot.transform.Find("mauler").gameObject;
+                    mauler.SetActive ( true );
+                    break;
+                }
+        }
 
-        float magic = CurrentPlayer.current_magic;
-        SetMagicLevel(magic);
+    }
 
-        int coins = CurrentPlayer.current_money;
-        SetCoins(coins);
-
-        int diamonds = CurrentPlayer.current_diamond;
-        SetDiamonds(diamonds);
-
-
+    // Update is called once per frame
+    private void Update ( )
+    {
         if ( Input.touchCount > 0 )
         {
 
@@ -98,215 +131,225 @@ public class MainHallController : MonoBehaviour, IDataSet {
                 return;
 
             }
+
+            if ( touch.phase == TouchPhase.Began )
+            {
+
+                if ( arRaycastManager.Raycast ( touch.position , touchList , TrackableType.PlaneWithinPolygon ) )
+                {
+                    ARPlane arPlane = ARPlaneManager.GetPlane(touchList[0].trackableId);
+                    Vector2 area = arPlane.size;
+
+                    Pose p = touchList[0].pose;
+
+                    //if ( arPlane.alignment == PlaneAlignment.HorizontalUp )
+                    //{
+                    //    SpawnMainHall ( p );
+                    //}
+
+                    if ( arPlane.alignment == PlaneAlignment.Vertical && area.x >= 0.20f && area.x <= 0.28f && area.y >= 0.25f && area.y <= 0.36f )
+                    {
+                        SpawnTreasureBox ( p );
+                    }
+                }
+            }
+
         }
 
+        Ray screenCenter = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2f, Screen.height / 2f));
 
-            Vector3 screenCenter = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-            if (ARRaycastManager.Raycast(screenCenter, hitList, TrackableType.PlaneWithinBounds))
+        if ( arRaycastManager.Raycast ( screenCenter , hitList , TrackableType.PlaneWithinPolygon ) )
+        {
+            ARPlane arPlane = ARPlaneManager.GetPlane(hitList[0].trackableId);
+
+            Pose p = hitList[0].pose;
+
+            if ( arPlane.alignment == PlaneAlignment.HorizontalUp && lightEstimation.brightness.HasValue )
             {
-                ARPlane arPlane = ARPlaneManager.GetPlane(hitList[0].trackableId);
 
-                Pose p = hitList[0].pose;
-
-                if (arPlane.alignment == PlaneAlignment.HorizontalDown && lightEstimation.brightness.HasValue)
+                if ( lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f )
                 {
-                    if (lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f)
-                    {
-                        SpawnGhost(p);
-                    }
+                    SpawnSkeleton ( p );
+                }
 
-                    if (lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f)
-                    {
-                        SpawnBat(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.6f)
-                    {
-                        SpawnSpider(p);
-                    }
+                if ( lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f )
+                {
 
                 }
 
-                if (arPlane.alignment == PlaneAlignment.HorizontalUp && lightEstimation.brightness.HasValue)
+                if ( lightEstimation.brightness.Value > 0.6f )
                 {
-                    if (lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f)
-                    {
-                        SpawnSkeleton(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f)
-                    {
-                        SpawnLandDrone(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.6f)
-                    {
-                        SpawnLightningBuba(p);
-                    }
-
-                }
-
-                if (arPlane.alignment == PlaneAlignment.Vertical && lightEstimation.brightness.HasValue)
-                {
-                    if (lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f)
-                    {
-                        SpawnPuzzlePortal(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f)
-                    {
-                        SpawnRobo1(p);
-                    }
-
-                    if (lightEstimation.brightness.Value > 0.6f)
-                    {
-                        SpawnTreasureBox(p);
-                    }
-
+                    SpawnLightningBuba ( p );
                 }
 
             }
 
-            
-
-            // Exit the app when the 'back' button is pressed.
-            if (Input.GetKey(KeyCode.Escape))
+            if ( arPlane.alignment == PlaneAlignment.Vertical && lightEstimation.brightness.HasValue )
             {
-                Application.Quit();
+                if ( lightEstimation.brightness.Value > 0 && lightEstimation.brightness.Value <= 0.3f )
+                {
+                    SpawnGhost ( p );
+                }
+
+                if ( lightEstimation.brightness.Value > 0.3f && lightEstimation.brightness.Value <= 0.6f )
+                {
+                    SpawnBat ( p );
+                }
+
+                if ( lightEstimation.brightness.Value > 0.6f )
+                {
+                    SpawnSpider ( p );
+                }
+
             }
 
-            // Get updated augmented images for this frame.
-
-
-
-        
-
-    }
-
-   
-
-    private void SpawnPuzzlePortal(Pose p)
-    {
-       if (puzzlePortal != null)
-       {
-            Destroy(puzzlePortal.gameObject, 2f);
-       }
-
-        puzzlePortal = Instantiate(puzzlePortalGO, p.position, p.rotation) as GameObject;
-        puzzlePortal.SetActive(true);
-    }
-
-    private void SpawnLightningBuba(Pose p)
-    {
-        if (lightningBuba != null)
-        {
-            Destroy(lightningBuba.gameObject, 2f);
         }
 
-        lightningBuba = Instantiate(lightningBubaGO, p.position, p.rotation) as GameObject;
-        lightningBuba.SetActive(true);
     }
 
-    private void SpawnSpider(Pose p)
+    private void SpawnTreasureBox ( Pose p )
     {
-        if (spider != null)
+        if ( treasureBox != null )
         {
-            Destroy(spider.gameObject, 2f);
+            Destroy ( treasureBox.gameObject , 2f );
         }
 
-        spider = Instantiate(spiderGO, p.position, p.rotation) as GameObject;
-        spider.SetActive(true);
+        treasureBox = Instantiate ( treasureBoxGO , p.position , p.rotation ) as GameObject;
+        treasureBox.transform.localRotation = Quaternion.Euler ( 270f , 0 , 0 );
+        treasureBox.SetActive ( true );
     }
 
-    private void SpawnRobo1(Pose p)
+    private void OnLoadFinished ( AsyncOperationHandle<Sprite> obj )
     {
-        if (robo1 != null)
+        characterImage.sprite = obj.Result;
+    }
+
+    private void SpawnMainHall ( Pose p )
+    {
+        if ( mainHall != null )
         {
-            Destroy(robo1.gameObject, 2f);
+            Destroy ( mainHall.gameObject , 2f );
         }
 
-        robo1 = Instantiate(robo1GO, p.position, p.rotation) as GameObject;
-        robo1.SetActive(true);
+        mainHall = Instantiate ( mainHallGO , p.position , p.rotation ) as GameObject;
+        mainHall.SetActive ( true );
+
+        if ( !hauntedMusic.isPlaying )
+        {
+            hauntedMusic.Play ( );
+        }
     }
 
-    private void SpawnLandDrone(Pose p)
+    private void SpawnPuzzlePortal ( Pose p )
     {
-        if (landDrone != null)
+        if ( puzzlePortal != null )
         {
-            Destroy(landDrone.gameObject, 2f);
+            Destroy ( puzzlePortal.gameObject , 2f );
         }
 
-        landDrone = Instantiate(landDroneGO, p.position, p.rotation) as GameObject;
-        landDrone.SetActive(true);
+        puzzlePortal = Instantiate ( puzzlePortalGO , p.position , p.rotation ) as GameObject;
+        puzzlePortal.SetActive ( true );
     }
 
-    private void SpawnBat(Pose p)
+    private void SpawnLightningBuba ( Pose p )
     {
-        if (puzzlePortal != null)
+        if ( lightningBuba != null )
         {
-            Destroy(puzzlePortal.gameObject, 2f);
+            Destroy ( lightningBuba.gameObject , 2f );
         }
 
-        puzzlePortal = Instantiate(puzzlePortalGO, p.position, p.rotation) as GameObject;
-        puzzlePortal.SetActive(true);
+        lightningBuba = Instantiate ( lightningBubaGO , p.position , p.rotation ) as GameObject;
+        lightningBuba.SetActive ( true );
+        NavMeshAgent lBubaAgent = lightningBuba.GetComponent<NavMeshAgent> ( );
+        lBubaAgent.transform.parent = surfaces [ 0 ].transform;
+
+        if ( lBubaAgent.Warp ( lightningBubaStartTransform.position ) )
+        {
+            lBubaAgent.isStopped = false;
+        }
     }
 
-    private void SpawnGhost(Pose p)
+    private void SpawnSpider ( Pose p )
     {
-        if (ghost != null)
+        if ( spider != null )
         {
-            Destroy(ghost.gameObject, 2f);
+            Destroy ( spider.gameObject , 2f );
         }
 
-        ghost = Instantiate(ghostGO, p.position, p.rotation) as GameObject;
-        ghost.SetActive(true);
+        spider = Instantiate ( spiderGO , p.position , p.rotation ) as GameObject;
+        spider.SetActive ( true );
+
+        NavMeshAgent spiderAgent = spider.GetComponent<NavMeshAgent> ( );
+        spiderAgent.transform.parent = surfaces [ 2 ].transform;
+
+        if ( spiderAgent.Warp ( spiderStartTransform.position ) )
+        {
+            spiderAgent.isStopped = false;
+            spiderAgent.destination = spiderStartTransform.position;
+
+        }
     }
 
-    private void SpawnTreasureBox(Pose p)
+    private void SpawnBat ( Pose p )
     {
-        if (treasureBox != null)
+        if ( bat != null )
         {
-            Destroy(treasureBox.gameObject, 2f);
+            Destroy ( bat.gameObject , 2f );
         }
 
-        treasureBox = Instantiate(treasureBoxGO, p.position, p.rotation) as GameObject;
-        treasureBox.SetActive(true);
-    }
+        bat = Instantiate ( batGO , p.position , p.rotation ) as GameObject;
+        bat.SetActive ( true );
 
-    private void SpawnSkeleton(Pose p)
-    {
-        if (skeleton != null)
+        NavMeshAgent batAgent = bat.GetComponent<NavMeshAgent> ( );
+
+        batAgent.transform.parent = surfaces [ 0 ].transform;
+
+        if ( batAgent.Warp ( batStartTransform.position ) )
         {
-            Destroy(skeleton.gameObject, 2f);
+            batAgent.isStopped = false;
+
         }
 
-        skeleton = Instantiate(skeletonGO, p.position, p.rotation) as GameObject;
-        skeleton.SetActive(true);
     }
 
-    public void SetMagicLevel(float magic)
+    private void SpawnGhost ( Pose p )
     {
-        magicBar.value = magic;
+        if ( ghost != null )
+        {
+            Destroy ( ghost.gameObject , 2f );
+        }
+
+        ghost = Instantiate ( ghostGO , p.position , p.rotation ) as GameObject;
+        ghost.SetActive ( true );
+
+        NavMeshAgent ghostAgent = ghost.GetComponent<NavMeshAgent> ( );
+        ghostAgent.transform.parent = surfaces [ 1 ].transform;
+
+        if ( ghostAgent.Warp ( ghostStartTransform.position ) )
+        {
+            ghostAgent.isStopped = false;
+
+        }
     }
 
-    public void SetLifeLevel(float life)
+    private void SpawnSkeleton ( Pose p )
     {
-        healthBar.value = life;
+        if ( skeleton != null )
+        {
+            Destroy ( skeleton.gameObject , 2f );
+        }
+
+        skeleton = Instantiate ( skeletonGO , p.position , p.rotation ) as GameObject;
+        skeleton.SetActive ( true );
+
+        NavMeshAgent skeletonAgent = skeleton.GetComponent<NavMeshAgent> ( );
+        skeletonAgent.transform.parent = surfaces [ 2 ].transform;
+
+        if ( skeletonAgent.Warp ( skeletonStartTransform.position ) )
+        {
+            skeletonAgent.isStopped = false;
+
+        }
     }
 
-    public void SetCoins(int currency)
-    {
-        coinText.text = currency.ToString();
-    }
-
-    public void SetDiamonds(int diamond)
-    {
-        diamondText.text = diamond.ToString();
-    }
-
-      
-   
 }
-
-   
-
